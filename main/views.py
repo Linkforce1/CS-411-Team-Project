@@ -15,7 +15,7 @@ class sign_up_form(forms.Form):
     confirm_password = forms.CharField(label='confirm password', max_length=100)
 
 def home(request):
-    return HttpResponse("Hello, Django!")
+    return HttpResponseRedirect("/welcome")
 
 def hello_there(request, name):
     return render(

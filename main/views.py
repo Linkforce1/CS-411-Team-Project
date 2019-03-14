@@ -51,7 +51,7 @@ def signup(request):
         form = sign_up_form()
     return render(
         request,
-        'login.html', {'form':form}
+        'signup.html', {'form':form}
     )
 
 def welcome(request):

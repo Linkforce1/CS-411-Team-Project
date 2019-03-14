@@ -28,6 +28,11 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+STATICFILES_DIRS = [
+    "/CS-411-TEAM-PROJECT/main/static/",
+]
+
+
 # Application definition
 
 INSTALLED_APPS = [

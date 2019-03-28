@@ -124,6 +124,19 @@ STATIC_URL = '/static/'
 REST_FRAMEWORK = {
 'DEFAULT_AUTHENTICATION_CLASSES': (
     'rest_framework.authentication.SessionAuthentication',
-     'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
+    'rest_framework.authentication.BasicAuthentication',
+    'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
 ),
+'DEFAULT_RENDERER_CLASSES': (
+    'rest_framework.renderers.JSONRenderer',
+    'rest_framework.renderers.BrowsableAPIRenderer',
+),
+'DEFAULT_PARSER_CLASSES': (
+    'rest_framework.parsers.JSONParser',
+    'rest_framework.parsers.FormParser',
+    'rest_framework.parsers.MultiPartParser',
+),
+'DEFAULT_PERMISSION_CLASSES': (
+    'rest_framework.permissions.AllowAny',
+)
 }

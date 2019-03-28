@@ -1,28 +1,25 @@
 from django.db import models
-
+from django.core.validators import RegexValidator
 # Create your models here.
 
 class Rooms(models.Model):
     idRoomNumber = models.IntegerField(primary_key=True)
+    RoomName = models.CharField(max_length = 45, default = "my-room")
     Access = models.CharField(max_length=7)
     Host = models.CharField(max_length=45)
+    objects = models.Manager()
     
 class Users(models.Model):
-    Email = models.CharField(max_length=45, primary_key = True)
-    Phone = models.CharField(max_length=14)
-    Nickname = models.CharField(max_length=45)
-    Gender = models.CharField(max_length=7)
-    Password = models.CharField(max_length=255)
-
-    def __init__(self, Email, Phone, Nickname, Gender, Password):
-        self.Email = Email
-        self.Phone = Phone
-        self.Nickname = Nickname
-        self.Gender = Gender
-        self.Password = Password
-
-        
+    Email = models.EmailField(primary_key = True)
+    phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
+    Phone = models.CharField(max_length=14, validators=[phone_regex], blank = True)
+    Nickname = models.CharField(max_length=45, blank = True)
+    Gender = models.CharField(max_length=6, blank = True)
+    Password = models.CharField(max_length=255, blank = False)
+    objects = models.Manager()
+     
 class Guest(models.Model):
     UserEmail = models.ForeignKey(Users,on_delete=models.CASCADE)
     RoomNumber = models.ForeignKey(Rooms, on_delete=models.CASCADE)
+    objects = models.Manager()
 

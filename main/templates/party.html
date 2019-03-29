@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Party</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+</head>
+<body>
+
+<header id="header">
+  <h2>Party' Time</h2>
+</header>
+<nav id="navbar">
+  <a href="#header" id="logo"><i class="fas fa-cat"></i> Hi There</a>
+    <div id="navbar-right">
+      <a id="first" href="#Section1">1</a>
+      <a id="second" href="#Section2">2</a>
+      <a id="second" href="#Section3">3</a>
+      <a id="forth" href="#Section4">4</a>
+    </div>
+</nav>
+<section id="Section1">  
+
+  <div class="content">
+
+    <div class="row">
+
+      <div class="column">
+      <h1> Song list </h1>
+      </div>
+
+      <div class="column">
+      <h1> Chart Part </h1>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% load staticfiles %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'css/party.css' %}">
+<script src="{% static 'party.js' %}"></script>  
+
+</body>
+</html>

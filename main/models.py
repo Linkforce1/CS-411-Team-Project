@@ -1,16 +1,18 @@
 from django.db import models
 from django.core.validators import RegexValidator
+from django.contrib.auth.models import AbstractUser
 # Create your models here.
 
 class Rooms(models.Model):
+    room_counter = 0
     idRoomNumber = models.IntegerField(primary_key=True)
     RoomName = models.CharField(max_length = 45, default = "my-room")
-    Access = models.CharField(max_length=7)
+    Access = models.CharField(max_length = 10, default = "public")
     Host = models.CharField(max_length=45)
     objects = models.Manager()
     
 class Users(models.Model):
-    Email = models.EmailField(primary_key = True)
+    Email = models.EmailField(max_length=45,unique=True)
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
     Phone = models.CharField(max_length=14, validators=[phone_regex], blank = True)
     Nickname = models.CharField(max_length=45, blank = True)
@@ -19,7 +21,9 @@ class Users(models.Model):
     objects = models.Manager()
      
 class Guest(models.Model):
-    UserEmail = models.ForeignKey(Users,on_delete=models.CASCADE)
+    UserEmail = models.ForeignKey(Users,on_delete=models.CASCADE,to_field='Email')
     RoomNumber = models.ForeignKey(Rooms, on_delete=models.CASCADE)
+    class Meta:
+        unique_together = ('UserEmail','RoomNumber')
     objects = models.Manager()
 

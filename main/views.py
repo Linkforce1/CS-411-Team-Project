@@ -59,7 +59,7 @@ def create(request):
             room_name = request.POST.get('room_name')
             private = request.POST.get('private')
             duration = request.POST.get('duration')
-            room = Rooms(idRoomNumber = Rooms.room_counter, RoomName = room_name, Access = '??', Host = '???')
+            room = Rooms(idRoomNumber = Rooms.room_counter, RoomName = room_name, Access = 'public', Host = '???')
             room.save()
             return JsonResponse(form.data, status=201)
     else:
@@ -89,6 +89,12 @@ def delete(request):
         'delete.html', {'form': form}
     )
 
+def public_rooms(request):
+    rooms = Rooms.objects.filter(Access='public').order_by('RoomName')
+    return render(request,
+                'public_rooms.html',
+                {'rooms': rooms}
+    )
 def update(request):
     form = update_form(request.POST or None)
     if request.method == 'POST':

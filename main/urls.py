@@ -13,5 +13,6 @@ urlpatterns = [
     path("signup", views.signup, name="signup"),
     path("party", views.party, name="party"),
     path("profile",views.profile,name="profile"),
+    path("public_rooms",views.public_rooms,name="public_rooms"),
     path('accounts/', include('django.contrib.auth.urls')),
 ]

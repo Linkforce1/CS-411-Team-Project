@@ -19,7 +19,7 @@ class sign_up_form(forms.Form):
     confirm_password = forms.CharField(label='confirm password', max_length=100)
 
 class room_form(forms.Form):
-    room_name = forms.CharField(label='room_name', max_length=100)
+    room_name = forms.CharField(label='Room Name', max_length=100)
     private = forms.BooleanField()
     duration = forms.IntegerField()
 
@@ -27,7 +27,6 @@ def home(request):
     return HttpResponseRedirect("/welcome")
 
 def user_home(request):
-
     return render(
         request,
         'home.html'
@@ -89,7 +88,7 @@ def signup(request):
             person = Users(Email = email, Nickname = nickname, Password = password)
             person.save()
             #serializer.save()
-            return JsonResponse(form.data,status=201)
+            return HttpResponseRedirect('/user_home')
     else:
         form = sign_up_form()
         #return JsonResponse(form.errors, status=400)

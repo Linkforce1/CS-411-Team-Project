@@ -3,12 +3,13 @@ from django.core.validators import RegexValidator
 # Create your models here.
 
 class Rooms(models.Model):
+    room_counter = 0
     idRoomNumber = models.IntegerField(primary_key=True)
     RoomName = models.CharField(max_length = 45, default = "my-room")
     Access = models.CharField(max_length=7)
     Host = models.CharField(max_length=45)
     objects = models.Manager()
-    
+
 class Users(models.Model):
     Email = models.EmailField(primary_key = True)
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
@@ -17,9 +18,8 @@ class Users(models.Model):
     Gender = models.CharField(max_length=6, blank = True)
     Password = models.CharField(max_length=255, blank = False)
     objects = models.Manager()
-     
+
 class Guest(models.Model):
     UserEmail = models.ForeignKey(Users,on_delete=models.CASCADE)
     RoomNumber = models.ForeignKey(Rooms, on_delete=models.CASCADE)
     objects = models.Manager()
-

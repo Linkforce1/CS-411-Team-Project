@@ -14,5 +14,7 @@ urlpatterns = [
     path("party", views.party, name="party"),
     path("profile",views.profile,name="profile"),
     path("public_rooms",views.public_rooms,name="public_rooms"),
-    path('accounts/', include('django.contrib.auth.urls')),
+    path("test",views.test,name="test"),
+    path('', include('django.contrib.auth.urls')),
+    path('social/', include('social_django.urls')),
 ]

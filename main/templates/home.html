@@ -15,9 +15,14 @@ body {margin:0;}
   <li> <a class="active" href="/home"> music party </a> </li>
   <li> <a href="/account"> account </a> </li>
   <li> <a href="/rooms"> your rooms </a> </li>
+  <li> <a href="{% url 'logout' %}" class="header-link">Log out</a> </li>
+  <!--<li><form id="myform" method="post" action="{% url 'social:disconnect' 'spotify' %}5/?next={{request.path }}">
+    {% csrf_token %}
+    <input type="hidden" name="name" value="value" /> 
+    <a onclick="document.getElementById('myform').submit();">discon</a>
+</form></li>-->
 </ul>
 
 <a class="join" href="/join"> join </a>
 <a class="create" href="/create"> create </a>
-
 </body>

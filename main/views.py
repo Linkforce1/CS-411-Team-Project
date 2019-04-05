@@ -8,6 +8,7 @@ from main.serializers import UsersSerializer
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 from main.models import Users, Rooms
+from . import spotifyAuth
 class login_form(forms.Form):
     email = forms.CharField(label='Email', max_length=100)
     password = forms.CharField(label='password', max_length=100)
@@ -156,6 +157,7 @@ def login(request):
         'login.html', {'form':form}
     )
 
+
 def signup(request):
     form = sign_up_form(request.POST or None)
     #serializer = UsersSerializer(data = form)
@@ -185,8 +187,14 @@ def welcome(request):
     )
 
 def profile(request):
+    spotifyAuth.userAuth()
+    #user_data = spotifyAuth.getUserData(auth_header)
     return render(request, 'profile.html')
 
 def party(request):
     return render(request, 'party.html')
-    
+
+def test(request):
+    auth_header = spotifyAuth.ajay(request)
+    user_data = spotifyAuth.getUserData(auth_header)
+    return render(request,'hello/test.html',{'user_data':user_data})

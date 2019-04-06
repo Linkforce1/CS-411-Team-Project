@@ -1,5 +1,5 @@
 import re
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from datetime import datetime
 from django.http import HttpResponse, JsonResponse
 from django import forms
@@ -26,14 +26,14 @@ class room_form(forms.Form):
 def home(request):
     return HttpResponseRedirect('/welcome');
 
-def user_home(request):
-
+def user_home(request, user_id):
+    # return HttpResponse(Users.objects.get(ID=user_id).Nickname)
     return render(
         request,
-        'home.html'
+        'home.html', {'user': Users.objects.get(ID=user_id)}
     )
 
-def create(request):
+def create(request, user_id):
     form = room_form(request.POST or None)
     if request.method == 'POST':
         if form.is_valid():
@@ -44,14 +44,16 @@ def create(request):
             room_name = request.POST.get('room_name')
             private = request.POST.get('private')
             duration = request.POST.get('duration')
-            room = Rooms(idRoomNumber = Rooms.room_counter, RoomName = room_name, Access = '??', Host = '???')
+            host = Users.objects.get(ID=user_id).Nickname
+            room = Rooms(idRoomNumber = Rooms.room_counter, RoomName = room_name, Access = '??', Host = host)
             room.save()
+            return redirect('user_home', user_id=user_id)
             return JsonResponse(form.data, status=201)
     else:
         form = room_form()
     return render(
         request,
-        'create.html', {'form': form}
+        'create.html', {'form': form, 'id': user_id}
     )
 
 
@@ -62,7 +64,17 @@ def login(request):
         if form.is_valid():
             email = request.POST.get('email')
             password = request.POST.get('password')
-            return HttpResponseRedirect('/user_home')
+
+            # check if the login is valid or not
+            if Users.objects.filter(Email=email).exists():
+                user = Users.objects.get(Email=email)
+                if user.Password == password:
+                    return redirect('user_home', user_id=user.ID)
+                else:
+                    return HttpResponse("Password is incorrect.")
+            else:
+                return HttpResponse("Email is invalid.")
+
     else:
         form = login_form()
     return render(
@@ -77,13 +89,18 @@ def signup(request):
         #data = request.POST.copy()
         #serializer = UsersSerializer(data = data)
         if form.is_valid():
+            if not Users.user_counter:
+                Users.user_counter = 1
+            else:
+                Users.user_counter += 1
             email = request.POST.get('email')
             nickname = request.POST.get('nickname')
             password = request.POST.get('password')
-            person = Users(email, Nickname = nickname, Password = password)
+            person = Users(ID = Users.user_counter, Email = email, Nickname = nickname, Password = password)
             person.save()
             #serializer.save()
-            return JsonResponse(form.data,status=201)
+            # return JsonResponse(form.data,status=201)
+            return redirect('welcome')
     else:
         form = sign_up_form()
         #return JsonResponse(form.errors, status=400)
@@ -98,8 +115,13 @@ def welcome(request):
         'welcome.html'
     )
 
-def profile(request):
-    return render(request, 'profile.html')
+def profile(request, user_id):
+    d = {
+        'user': Users.objects.get(ID=user_id),
+        'users': Users.objects.all(),
+        'rooms': Rooms.objects.all(),
+    }
+    return render(request, 'profile.html', d)
 
 
 def party(request):

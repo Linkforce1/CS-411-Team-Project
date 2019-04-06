@@ -11,7 +11,9 @@ class Rooms(models.Model):
     objects = models.Manager()
 
 class Users(models.Model):
-    Email = models.EmailField(primary_key = True)
+    user_counter = 0
+    ID = models.IntegerField(primary_key=True)
+    Email = models.EmailField()
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
     Phone = models.CharField(max_length=14, validators=[phone_regex], blank = True)
     Nickname = models.CharField(max_length=45, blank = True)
@@ -20,6 +22,6 @@ class Users(models.Model):
     objects = models.Manager()
 
 class Guest(models.Model):
-    UserEmail = models.ForeignKey(Users,on_delete=models.CASCADE)
-    RoomNumber = models.ForeignKey(Rooms, on_delete=models.CASCADE)
+    # UserEmail = models.ForeignKey(Users,on_delete=models.CASCADE)
+    # RoomNumber = models.ForeignKey(Rooms, on_delete=models.CASCADE)
     objects = models.Manager()

@@ -1,3 +1,7 @@
+# Register your models here.
 from django.contrib import admin
 
-# Register your models here.
+from .models import Users, Rooms, Guest
+
+admin.site.register(Users)
+admin.site.register(Rooms)

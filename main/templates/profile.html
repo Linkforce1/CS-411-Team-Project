@@ -1,1 +1,58 @@
-<h1>This is the profile page</h1>
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title></title>
+</head>
+<body>
+  <a href="{% url 'user_home' user.ID %}"> go to user home </a>
+  <h1>This is the profile page</h1>
+  <li> Welcome {{user.Nickname}} </li>
+  <li> Email: {{user.Email}} </li>
+
+  <h1>All information is as follows. This should be deleted later</h1>
+  <h3>users</h3>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>id</th>
+        <th>nickname</th>
+        <th>Email</th>
+        <th>gender</th>
+        <th>password</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+        <tr>
+          <td>{{ user.ID }}</td>
+          <td>{{ user.Nickname }}</td>
+          <td>{{ user.Email }}</td>
+          <td>{{ user.Gender }}</td>
+          <td>{{ user.Password }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3>rooms</h3>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>id</th>
+        <th>roomname</th>
+        <th>host</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for room in rooms %}
+        <tr>
+          <td>{{ room.idRoomNumber }}</td>
+          <td>{{ room.RoomName }}</td>
+          <td>{{ room.Host }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

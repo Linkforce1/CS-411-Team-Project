@@ -23,6 +23,9 @@ class room_form(forms.Form):
     private = forms.BooleanField()
     duration = forms.IntegerField()
 
+class room_search_form(forms.Form):
+    search = forms.CharField(label='search', max_length=100)
+
 def home(request):
     return HttpResponseRedirect('/welcome');
 
@@ -56,7 +59,30 @@ def create(request, user_id):
         'create.html', {'form': form, 'id': user_id}
     )
 
+def join(request):
+    form = room_search_form(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            room_name = request.POST.get('search')
+            print(room_name)
+            res = Rooms.objects.filter(RoomName = room_name)
+            return render(
+                request,
+                    'res.html', {'res':res}
+            )
+    else:
+        form = room_search_form()
+    return render(
+        request,
+        'join.html', {'form':form }
+    )
 
+def public_rooms(request):
+    rooms = Rooms.objects.filter(Access='public').order_by('RoomName')
+    return render(request,
+                'public_rooms.html',
+                {'rooms': rooms}
+    )
 
 def login(request):
     form = login_form(request.POST or None)

@@ -1,4 +1,5 @@
 import re
+import crypt
 from django.shortcuts import render, redirect
 from datetime import datetime
 from django.http import HttpResponse, JsonResponse
@@ -8,9 +9,26 @@ from main.serializers import UsersSerializer
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 from main.models import Users, Rooms
+
+LOGIN_COOKIE = 'music_party_logged_in'
+
 class login_form(forms.Form):
     email = forms.CharField(label='Email', max_length=100)
     password = forms.CharField(label='password', max_length=100)
+
+class delete_form(forms.Form):
+    email = forms.CharField(label='Email', max_length=100)
+    password = forms.CharField(label='password', max_length=100)
+    room_name = forms.CharField(label='room_name', max_length=100)
+
+class update_form(forms.Form):
+    email = forms.CharField(label='Email', max_length=100)
+    password = forms.CharField(label='password', max_length=100)
+    room_name = forms.CharField(label='room_name', max_length=100)
+    new_room_name = forms.CharField(label='new_room_name', max_length=100)
+
+class room_search_form(forms.Form):
+    search = forms.CharField(label='search', max_length=100)
 
 class sign_up_form(forms.Form):
     email = forms.CharField(label='Email', max_length=100)
@@ -23,13 +41,20 @@ class room_form(forms.Form):
     private = forms.BooleanField()
     duration = forms.IntegerField()
 
-class room_search_form(forms.Form):
-    search = forms.CharField(label='search', max_length=100)
+def login_check(login_stat, user_id):
+    this = Users.objects.filter(ID = user_id)
+    if this.first():
+        if login_stat and login_stat == crypt.crypt(this.first().Email, 'abc'):
+            return 1
+    return 0;
+
 
 def home(request):
     return HttpResponseRedirect('/welcome');
 
 def user_home(request, user_id):
+    if not login_check(request.COOKIES.get(LOGIN_COOKIE, None), user_id):
+        return HttpResponseRedirect('/welcome');
     # return HttpResponse(Users.objects.get(ID=user_id).Nickname)
     return render(
         request,
@@ -37,6 +62,8 @@ def user_home(request, user_id):
     )
 
 def create(request, user_id):
+    if not login_check(request.COOKIES.get(LOGIN_COOKIE, None), user_id):
+        return HttpResponseRedirect('/welcome');
     form = room_form(request.POST or None)
     if request.method == 'POST':
         if form.is_valid():
@@ -47,8 +74,7 @@ def create(request, user_id):
             room_name = request.POST.get('room_name')
             private = request.POST.get('private')
             duration = request.POST.get('duration')
-            host = Users.objects.get(ID=user_id).Nickname
-            room = Rooms(idRoomNumber = Rooms.room_counter, RoomName = room_name, Access = '??', Host = host)
+            room = Rooms(idRoomNumber = Rooms.room_counter, RoomName = room_name, Access = 'public', Host = '???')
             room.save()
             return redirect('user_home', user_id=user_id)
             return JsonResponse(form.data, status=201)
@@ -57,6 +83,53 @@ def create(request, user_id):
     return render(
         request,
         'create.html', {'form': form, 'id': user_id}
+    )
+
+def delete(request):
+    form = delete_form(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            email = request.POST.get('email')
+            password = request.POST.get('password')
+            room_name = request.POST.get('room_name')
+            res = Users.objects.filter(Email = email).filter(Password = password)
+            if res:
+                pending_rooms = Rooms.objects.filter(RoomName = room_name)
+                if pending_rooms.first() and pending_rooms.first().Host == res.first().Nickname:
+                    pending_rooms.first().delete()
+            return HttpResponse("Done")
+    else:
+        form = delete_form()
+    return render(
+        request,
+        'delete.html', {'form': form}
+    )
+
+def public_rooms(request):
+    rooms = Rooms.objects.filter(Access='public').order_by('RoomName')
+    return render(request,
+                'public_rooms.html',
+                {'rooms': rooms}
+    )
+def update(request):
+    form = update_form(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            email = request.POST.get('email')
+            password = request.POST.get('password')
+            room_name = request.POST.get('room_name')
+            new_room_name = request.POST.get('new_room_name')
+            res = Users.objects.filter(Email = email).filter(Password = password)
+            if res:
+                pending_rooms = Rooms.objects.filter(RoomName = room_name)
+                if pending_rooms.first() and pending_rooms.first().Host == res.first().Nickname:
+                    pending_rooms.update(RoomName=new_room_name)
+            return HttpResponse("Done")
+    else:
+        form = update_form()
+    return render(
+        request,
+        'update.html', {'form': form}
     )
 
 def join(request):
@@ -77,12 +150,6 @@ def join(request):
         'join.html', {'form':form }
     )
 
-def public_rooms(request):
-    rooms = Rooms.objects.filter(Access='public').order_by('RoomName')
-    return render(request,
-                'public_rooms.html',
-                {'rooms': rooms}
-    )
 
 def login(request):
     form = login_form(request.POST or None)
@@ -95,7 +162,13 @@ def login(request):
             if Users.objects.filter(Email=email).exists():
                 user = Users.objects.get(Email=email)
                 if user.Password == password:
-                    return redirect('user_home', user_id=user.ID)
+                    response = render(
+                        request,
+                        'home.html', {'user': user}
+                    )
+                     # redirect('user_home', user_id=user.ID)
+                    response.set_cookie(LOGIN_COOKIE, crypt.crypt(email, 'abc'))
+                    return response
                 else:
                     return HttpResponse("Password is incorrect.")
             else:
@@ -142,6 +215,8 @@ def welcome(request):
     )
 
 def profile(request, user_id):
+    if not login_check(request.COOKIES.get(LOGIN_COOKIE, None), user_id):
+        return HttpResponseRedirect('/welcome');
     d = {
         'user': Users.objects.get(ID=user_id),
         'users': Users.objects.all(),

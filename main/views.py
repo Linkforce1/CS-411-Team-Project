@@ -37,7 +37,8 @@ def party(request):
 
     return render(
         request,
-        'party.html'
+        'party.html',
+        {}
     )
 
 

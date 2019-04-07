@@ -33,6 +33,14 @@ def user_home(request):
         'home.html'
     )
 
+def party(request):
+
+    return render(
+        request,
+        'party.html'
+    )
+
+
 def create(request):
     form = room_form(request.POST or None)
     if request.method == 'POST':
@@ -46,7 +54,7 @@ def create(request):
             duration = request.POST.get('duration')
             room = Rooms(idRoomNumber = Rooms.room_counter, RoomName = room_name, Access = '??', Host = '???')
             room.save()
-            return JsonResponse(form.data, status=201)
+            return HttpResponseRedirect('/party')
     else:
         form = room_form()
     return render(
@@ -83,7 +91,8 @@ def signup(request):
             person = Users(email, Nickname = nickname, Password = password)
             person.save()
             #serializer.save()
-            return JsonResponse(form.data,status=201)
+            # return JsonResponse(form.data,status=201)
+            return HttpResponseRedirect('/welcome')
     else:
         form = sign_up_form()
         #return JsonResponse(form.errors, status=400)

@@ -11,4 +11,5 @@ urlpatterns = [
     path("party", views.party, name="party"),
     path("profile",views.profile,name="profile"),
     path('accounts/', include('django.contrib.auth.urls')),
+    
 ]

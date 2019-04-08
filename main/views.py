@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect
 from main.serializers import UsersSerializer
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
-from main.models import Users, Rooms
+from main.models import Users, Rooms, Guest
 class login_form(forms.Form):
     email = forms.CharField(label='Email', max_length=100)
     password = forms.CharField(label='password', max_length=100)
@@ -30,11 +30,19 @@ def home(request):
     return HttpResponseRedirect('/welcome');
 
 def user_home(request, user_id):
-    # return HttpResponse(Users.objects.get(ID=user_id).Nickname)
     return render(
         request,
         'home.html', {'user': Users.objects.get(ID=user_id)}
     )
+
+def profile(request, user_id):
+    d = {
+        'user': Users.objects.get(ID=user_id),
+        'users': Users.objects.all(),
+        'rooms': Rooms.objects.all(),
+        'guests': Guest.objects.all(),
+    }
+    return render(request, 'profile.html', d)
 
 def create(request, user_id):
     form = room_form(request.POST or None)
@@ -51,7 +59,7 @@ def create(request, user_id):
             room = Rooms(idRoomNumber = Rooms.room_counter, RoomName = room_name, Access = '??', Host = host)
             room.save()
             return redirect('user_home', user_id=user_id)
-            return JsonResponse(form.data, status=201)
+            # return JsonResponse(form.data, status=201)
     else:
         form = room_form()
     return render(
@@ -59,23 +67,39 @@ def create(request, user_id):
         'create.html', {'form': form, 'id': user_id}
     )
 
-def join(request):
+def join(request, user_id):
     form = room_search_form(request.POST or None)
     if request.method == 'POST':
         if form.is_valid():
             room_name = request.POST.get('search')
-            print(room_name)
-            res = Rooms.objects.filter(RoomName = room_name)
+            rooms = Rooms.objects.filter(RoomName__contains = room_name)
             return render(
                 request,
-                'res.html', {'res':res}
+                'res.html',
+                {'rooms':rooms, 'user_id': user_id}
             )
     else:
         form = room_search_form()
     return render(
         request,
-        'join.html', {'form':form }
+        'join.html', {'form':form, 'user_id': user_id}
     )
+
+def addGuest(request, room_id, user_id):
+    guest = Guest(User = Users.objects.get(ID=user_id), Room = Rooms.objects.get(idRoomNumber=room_id))
+    guest.save()
+    return redirect('party', room_id=room_id, user_id=user_id)
+
+
+def party(request, room_id, user_id):
+    room = Rooms.objects.get(idRoomNumber = room_id)
+    d = {
+        'user': Users.objects.get(ID=user_id),
+        'room': room,
+        'guests': Guest.objects.filter(Room = room),
+    }
+    return render(request, 'party.html', d)
+
 
 def public_rooms(request):
     rooms = Rooms.objects.filter(Access='public').order_by('RoomName')
@@ -140,15 +164,3 @@ def welcome(request):
         request,
         'welcome.html'
     )
-
-def profile(request, user_id):
-    d = {
-        'user': Users.objects.get(ID=user_id),
-        'users': Users.objects.all(),
-        'rooms': Rooms.objects.all(),
-    }
-    return render(request, 'profile.html', d)
-
-
-def party(request):
-    return render(request, 'party.html')

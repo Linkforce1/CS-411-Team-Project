@@ -9,7 +9,7 @@
 <input type="submit" class="fadeIn fourth" value="Log In">
 </section> -->
 {% block body %}
-<form action="/join" method="post">
+<form action="{% url 'join' user_id %}" method="post">
   {% csrf_token %}
   <!--<input type="text" id="login" class="fadeIn second" name="login" placeholder="login">
   <input type="text" id="password" class="fadeIn third" name="login" placeholder="password">-->
@@ -17,11 +17,5 @@
   <input type="submit" class="fadeIn second" value="submit">
 
 </form>
-<ul>
-  {% for room in res %}
-      <li> {{room.idRoomNumber}} </li>
-      <li> {{room.RoomName}} </li>
-      <li> {{room.Host}} </li>
-  {% endfor %}
-</ul>
+
 {% endblock %}

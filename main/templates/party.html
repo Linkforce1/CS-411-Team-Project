@@ -23,7 +23,7 @@
       <a id="forth" href="#Section4">4</a>
     </div>
 </nav>
-<section id="Section1">  
+<section id="Section1">
 
   <div class="content">
 
@@ -38,13 +38,47 @@
       </div>
 
     </div>
+
+    <div class="row">
+      <div class="column">
+      <h1> room: {{ room.RoomName }} </h1>
+      </div>
+      <div class="column">
+      <h1> user: {{ user.Nickname }} </h1>
+      </div>
+    </div>
+
+    <div class="row">
+      <h1> guests in the room </h1>
+        <table border="1">
+          <thead>
+            <tr>
+              <th>user id</th>
+              <th>user name</th>
+              <th>room id</th>
+              <th>room name</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for guest in guests %}
+              <tr>
+                <td>{{ guest.User.ID }}</td>
+                <td>{{ guest.User.Nickname }}</td>
+                <td>{{ guest.Room.idRoomNumber }}</td>
+                <td>{{ guest.Room.RoomName }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    </div>
+
   </div>
 </section>
 
 {% load staticfiles %}
 
 <link rel="stylesheet" type="text/css" href="{% static 'css/party.css' %}">
-<script src="{% static 'party.js' %}"></script>  
+<script src="{% static 'party.js' %}"></script>
 
 </body>
 </html>

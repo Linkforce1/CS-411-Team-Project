@@ -10,7 +10,7 @@
   <li> Welcome {{user.Nickname}} </li>
   <li> Email: {{user.Email}} </li>
 
-  <h1>All information is as follows. This should be deleted later</h1>
+  <h1>Database information</h1>
   <h3>users</h3>
   <table border="1">
     <thead>
@@ -50,6 +50,24 @@
           <td>{{ room.idRoomNumber }}</td>
           <td>{{ room.RoomName }}</td>
           <td>{{ room.Host }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3>Guest</h3>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>room</th>
+        <th>user</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for guest in guests %}
+        <tr>
+          <td>{{ guest.Room.RoomName }}</td>
+          <td>{{ guest.User.Nickname }}</td>
         </tr>
       {% endfor %}
     </tbody>

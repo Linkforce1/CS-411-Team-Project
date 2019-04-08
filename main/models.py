@@ -22,6 +22,6 @@ class Users(models.Model):
     objects = models.Manager()
 
 class Guest(models.Model):
-    # UserEmail = models.ForeignKey(Users,on_delete=models.CASCADE)
-    # RoomNumber = models.ForeignKey(Rooms, on_delete=models.CASCADE)
+    User = models.ForeignKey(Users, on_delete=models.CASCADE, null=True)
+    Room = models.ForeignKey(Rooms, on_delete=models.CASCADE, null=True)
     objects = models.Manager()

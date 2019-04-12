@@ -148,7 +148,6 @@
       <h1> {{ room.RoomName }} </h1>
 
 
-
       <textarea id="chat-log" cols="100" rows="20"></textarea><br/>
       <input id="chat-message-input" type="text" size="100"/><br/>
       <input id="chat-message-submit" type="button" value="Send"/>
@@ -160,7 +159,7 @@
             // 'ws://' + window.location.host +
             // '/ws/chat/' + roomName + '/');
             'ws://' + window.location.host +
-            '/ws/party');
+            '/ws/party/1/1');
 
         chatSocket.onmessage = function(e) {
             var data = JSON.parse(e.data);
@@ -183,7 +182,8 @@
             var messageInputDom = document.querySelector('#chat-message-input');
             var message = messageInputDom.value;
             chatSocket.send(JSON.stringify({
-                'message': {{ user.Nickname }} + ": " + message
+                'message':  "{{ user.Nickname }}" + ": " + message
+                // 'message': ": " + message
             }));
 
             messageInputDom.value = '';

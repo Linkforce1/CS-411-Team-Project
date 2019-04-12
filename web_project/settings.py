@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'rest_framework',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -139,4 +140,16 @@ REST_FRAMEWORK = {
 'DEFAULT_PERMISSION_CLASSES': (
     'rest_framework.permissions.AllowAny',
 )
+}
+
+# mysite/settings.py
+# Channels
+ASGI_APPLICATION = 'web_project.routing.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('localhost', 6379)],
+        },
+    },
 }

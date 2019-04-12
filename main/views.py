@@ -98,7 +98,7 @@ def party(request, room_id, user_id):
         'room': room,
         'guests': Guest.objects.filter(Room = room),
     }
-    return render(request, 'party.html', d)
+    return render(request, 'party.html', {})
 
 
 def public_rooms(request):

@@ -12,6 +12,7 @@ urlpatterns = [
     path("join/<int:user_id>", views.join, name="join"),
     path("addGuest/<int:room_id>/<int:user_id>", views.addGuest, name="addGuest"),
     path("party/<int:room_id>/<int:user_id>", views.party, name="party"),
+    #path("party", views.party, name="party"),
 
     path("public_rooms",views.public_rooms,name="public_rooms"),
 ]

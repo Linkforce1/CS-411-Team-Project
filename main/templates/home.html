@@ -13,12 +13,14 @@ body {margin:0;}
 
 <body>
 <ul>
-  <li> <a class="active" href="/home"> music party </a> </li>
-  <li> <a href="/account"> account </a> </li>
+  <h1> Welcome {{user.Nickname}} </h1>
+  <li> <a class="active" href="/welcome"> music party </a> </li>
+  <li> <a href="{% url 'profile' user.ID %}"> account </a> </li>
   <li> <a href="/rooms"> your rooms </a> </li>
 </ul>
 
-<a class="join" href="/join"> join </a>
-<a class="create" href="/create"> create </a>
+
+<a class="join" href="{% url 'join' user.ID %}"> join </a>
+<a class="create" href="{% url 'create' user.ID %}"> create </a>
 
 </body>

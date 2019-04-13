@@ -4,5 +4,5 @@ from django.urls import path
 from . import consumers
 
 websocket_urlpatterns = [
-    path('ws/party', consumers.ChatConsumer),
+    path('ws/party/1/1', consumers.ChatConsumer),
 ]

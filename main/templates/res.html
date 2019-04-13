@@ -1,0 +1,27 @@
+{% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/login.css' %}">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<table border="1">
+    <thead>
+      <tr>
+        <th> ID </th>
+        <th>Room name</th>
+        <th> Host </th>
+        <th>　</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for room in rooms %}
+        <tr>
+          <td>{{ room.idRoomNumber }}</td>
+          <td>{{ room.RoomName }}</td>
+          <td>{{ room.Host }}</td>
+          <td><a href="{% url 'addGuest' room.idRoomNumber user_id %}">Join</a></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+</table>
+
+<a href="{% url 'join' user_id %}"> search again </a>

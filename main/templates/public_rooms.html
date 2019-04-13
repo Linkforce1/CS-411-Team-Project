@@ -1,0 +1,6 @@
+<h1>This is public rooms</h1>
+<ul>
+    {% for room in rooms %}
+        <li> {{room.idRoomNumber}} {{room.RoomName}} {{room.Host}}</li>
+    {% endfor %}
+</ul>

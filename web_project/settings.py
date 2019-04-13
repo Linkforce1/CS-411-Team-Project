@@ -31,7 +31,6 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'chat',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -41,7 +40,6 @@ INSTALLED_APPS = [
     'main',
     'rest_framework',
     'channels',
-    
 ]
 
 MIDDLEWARE = [
@@ -143,18 +141,6 @@ REST_FRAMEWORK = {
     'rest_framework.permissions.AllowAny',
 )
 }
-
-# ASGI_APPLICATION = "web_project.routing.application"
-
-# CHANNEL_LAYERS = {
-#     'default': {
-#         'BACKEND': 'asgi_redis.RedisChannelLayer',
-#         'CONFIG': {
-#             'hosts': [('localhost', 6379)],
-#         },
-#         'ROUTING': 'chantest.routing.channel_routing',
-#     }
-# }
 
 # mysite/settings.py
 # Channels

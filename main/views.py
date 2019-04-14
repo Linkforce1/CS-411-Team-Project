@@ -8,6 +8,8 @@ from main.serializers import UsersSerializer
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 from main.models import Users, Rooms, Guest
+from django.contrib import messages
+
 class login_form(forms.Form):
     email = forms.CharField(label='Email', max_length=100)
     password = forms.CharField(label='password', max_length=100)
@@ -43,6 +45,18 @@ def profile(request, user_id):
         'guests': Guest.objects.all(),
     }
     return render(request, 'profile.html', d)
+
+
+def yourRooms(request, user_id):
+    user = Users.objects.get(ID=user_id)
+    rooms = []
+    for guest in Guest.objects.filter(User=user):
+        rooms.append(guest.Room)
+    hostRooms = Rooms.objects.filter(Host=user.Nickname)
+    return render(
+        request,
+        'yourRooms.html', {'rooms': rooms, 'hostRooms': hostRooms, 'user': user}
+    )
 
 def create(request, user_id):
     form = room_form(request.POST or None)
@@ -121,9 +135,12 @@ def login(request):
                 if user.Password == password:
                     return redirect('user_home', user_id=user.ID)
                 else:
-                    return HttpResponse("Password is incorrect.")
+                    messages.error(request,'Password is incorrect.')
+                   # return redirect('login')
+                   # return HttpResponse("Password is incorrect.")
             else:
-                return HttpResponse("Email is invalid.")
+                messages.error(request,'Email does not exist.')
+              #  return HttpResponse("Email is invalid.")
 
     else:
         form = login_form()

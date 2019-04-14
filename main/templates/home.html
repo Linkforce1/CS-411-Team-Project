@@ -7,16 +7,17 @@
 <head>
 <style>
 body {margin:0;}
-
 </style>
 </head>
 
 <body>
 <ul>
+  
   <h1> Welcome {{user.Nickname}} </h1>
   <li> <a class="active" href="/welcome"> music party </a> </li>
   <li> <a href="{% url 'profile' user.ID %}"> account </a> </li>
-  <li> <a href="/rooms"> your rooms </a> </li>
+  <li> <a href="{% url 'yourRooms' user.ID %}"> account </a> </li>
+
 </ul>
 
 

@@ -104,3 +104,231 @@ li a:hover:not(.active) {
   -moz-animation-delay: 1.4s;
   animation-delay: 1.4s;
 }
+
+
+
+html {
+    scroll-behavior: smooth;
+  }
+  
+  nav {
+    position: sticky;
+    top: 0;
+    padding: 20px;
+    background: lightblue;
+    overflow: hidden;
+    background-color: black;
+    transition: 0.4s;
+    width: 100;
+    z-index: 10;
+  
+  }
+  nav a{
+    float: left;
+    display: block;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+    font-weight: 700;
+  }
+  nav a:hover{
+    background-color: #ddd;
+    color: black;
+  }
+  
+  nav a.active{
+      background-color: #4CAF50;
+      color: white;
+    }
+  nav a.current{
+    background: black;
+  }
+  
+  /* Display some links to the right */
+  nav div {
+    float: right;
+  }
+  
+  #logo {
+    font-size: 35px;
+    font-weight: bold;
+    transition: 0.4s;
+  }
+  
+  .row {
+    display: flex;
+  }
+  
+  .column {
+    width: 50%;
+  }
+  
+  
+  
+  #video{
+      left: 50%;
+      position: relative;
+      top: 50%;
+      transform: translate(-50%);
+  }
+  
+  
+  
+  body {
+    margin: auto; 
+    font-weight: 500;
+    font-family: 'HelveticaNeue';
+  }
+  
+  section {
+    width: 100%;
+    padding: 0 7%;
+    display: table;
+    margin: 0;
+    max-width: none;
+    background-color: #373B44;
+    height: 100vh;
+  }
+  
+  .content {
+    display: table-cell;
+    vertical-align: middle;
+    padding: 16px;
+  }
+  
+  h1 {
+    font-size: 3em;
+    display: block;
+    color: white;
+    font-weight: 300;
+  }
+  
+  p {
+    font-size: 1.5em;
+    font-weight: 500;
+    color: #C3CAD9;
+  }
+  
+  header {
+    padding: 1% 5%;
+    text-align: center;
+    background-color: #373B44;
+    color: white;
+    width: 100%;
+  }
+
+  
+  
+  
+  
+  
+  
+  
+  .mySlides {
+    display: none;
+  }
+  img {vertical-align: middle;}
+  
+  /* Slideshow container */
+  .slideshow-container {
+    max-width: 1000px;
+    position: relative;
+    margin: auto;
+  
+  }
+  
+  /* Next & previous buttons */
+  .prev, .next {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    width: auto;
+    padding: 16px;
+    margin-top: -22px;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    transition: 0.6s ease;
+    border-radius: 0 3px 3px 0;
+    user-select: none;
+  }
+  
+  /* Position the "next button" to the right */
+  
+  .next {
+    right: 0;
+    border-radius: 3px 0 0 3px;
+  }
+  
+  /* On hover, add a black background color with a little bit see-through */
+  .prev:hover, .next:hover {
+    background-color: rgba(0,0,0,0.8);
+  }
+  
+  /* Fading animation */
+  .fade {
+    -webkit-animation-name: fade;
+    -webkit-animation-duration: 1.5s;
+    animation-name: fade;
+    animation-duration: 1.5s;
+  }
+  
+  
+  
+  
+  .btn {
+      position: relative;
+      left: 50%;
+      /* top: 50%; */
+      /* background-color: white; */
+      background-color: #313831;
+      border: none;
+      color: white;
+      padding: 15px 32px;
+      text-align: center;
+      text-decoration: none;
+      /* display: inline-block; */
+      font-size: 16px;
+  }
+  .btn:hover {
+    box-shadow: 0 3px 0 transparent;
+    top: 3px;
+  }
+  .btn:active {
+    background: #f2f2f2;
+  }
+  
+  .modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+  
+  /* Modal Content */
+  .modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+  }
+  
+  /* The Close Button */
+  .close {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  
+  

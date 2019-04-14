@@ -1,43 +1,141 @@
 <!DOCTYPE html>
 <html>
 <head lang="en">
+    {% load staticfiles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/party.css' %}">
   <meta charset="UTF-8">
-  <title></title>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  
+  <title>Party</title>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+
+  <title>Profile Page</title>
 </head>
+<style>
+
+a {
+  color: red;
+  font-family: helvetica;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a:active {
+  color: black;
+}
+
+a:visited {
+  color: purple;
+}
+
+
+  h3 {
+    font-size: 2em;
+    display: block;
+    color: black;
+    font-weight: 250;
+  }
+  h4 {
+    font-size: 3em;
+    display: block;
+    color: black;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  table.blueTable {
+    border: 1px solid #1C6EA4;
+    background-color: #EEEEEE;
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+  }
+  table.blueTable td, table.blueTable th {
+    border: 1px solid #AAAAAA;
+    padding: 3px 2px;
+  }
+  table.blueTable tbody td {
+    font-size: 15px;
+    font-weight: bold;
+  }
+  table.blueTable tr:nth-child(even) {
+    background: #D0E4F5;
+  }
+  table.blueTable thead {
+    background: #1C6EA4;
+    background: -moz-linear-gradient(top, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
+    background: -webkit-linear-gradient(top, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
+    background: linear-gradient(to bottom, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
+    border-bottom: 2px solid #444444;
+  }
+  table.blueTable thead th {
+    font-size: 17px;
+    font-weight: bold;
+    color: #FFFFFF;
+    border-left: 2px solid #D0E4F5;
+  }
+  table.blueTable thead th:first-child {
+    border-left: none;
+  }
+</style>
 <body>
+
+    <header id="header">
+        <h2>Hi {{user.Nickname}}, {{user.Email}}</h2>
+      </header> 
+      
   <a href="{% url 'user_home' user.ID %}"> go to user home </a>
-  <h1>This is the profile page</h1>
+  <!-- <h2>This is the profile page</h2> -->
+
+  <!-- <div>
   <li> Welcome {{user.Nickname}} </li>
   <li> Email: {{user.Email}} </li>
+  </div> -->
 
-  <h1>Database information</h1>
-  <h3>users</h3>
-  <table border="1">
-    <thead>
+
+  <h4>Database information</h4>
+  
+  <h3>Users</h3>
+
+<div>
+  <table class="blueTable">
+      <thead>
       <tr>
-        <th>id</th>
-        <th>nickname</th>
-        <th>Email</th>
-        <th>gender</th>
-        <th>password</th>
+      <th>id</th>
+      <th>Nickname</th>
+      <th>Email</th>
+      <th>Gender</th>
+      <th>Passward</th>
       </tr>
-    </thead>
-    <tbody>
-      {% for user in users %}
-        <tr>
-          <td>{{ user.ID }}</td>
-          <td>{{ user.Nickname }}</td>
-          <td>{{ user.Email }}</td>
-          <td>{{ user.Gender }}</td>
-          <td>{{ user.Password }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+          {% for user in users %}
+              <tr>
+                  <td>{{ user.ID }}</td>
+                  <td>{{ user.Nickname }}</td>
+                  <td>{{ user.Email }}</td>
+                  <td>{{ user.Gender }}</td>
+                  <td>{{ user.Password }}</td>
+              </tr>
+           {% endfor %}
+      <tr>
+      </tbody>
+      </table>
+    </div>
 
-  <h3>rooms</h3>
-  <table border="1">
-    <thead>
+
+  <h3>Rooms</h3>
+
+<div>
+  <table class="blueTable">
+      <thead>
       <tr>
         <th>id</th>
         <th>roomname</th>
@@ -54,23 +152,28 @@
       {% endfor %}
     </tbody>
   </table>
+</div>
 
   <h3>Guest</h3>
-  <table border="1">
-    <thead>
-      <tr>
-        <th>room</th>
-        <th>user</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for guest in guests %}
+
+  <div>
+      <table class="blueTable">
+          <thead>
         <tr>
-          <td>{{ guest.Room.RoomName }}</td>
-          <td>{{ guest.User.Nickname }}</td>
+          <th>room</th>
+          <th>user</th>
         </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</body>
-</html>
+      </thead>
+      <tbody>
+        {% for guest in guests %}
+          <tr>
+            <td>{{ guest.Room.RoomName }}</td>
+            <td>{{ guest.User.Nickname }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  </body>
+  </html>
+  

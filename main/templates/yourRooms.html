@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head lang="en">
@@ -9,7 +10,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   
-  <title>Search Room Result</title>
+  <title>Account</title>
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 
 </head>
@@ -87,35 +88,62 @@ a:visited {
 <body>
 
     <header id="header">
-        <h2>Search Room Result</h2>
-      </header> 
+        <h2>Hi {{user.Nickname}}, Here is Your Rooms</h2>
+      </header>
 
-  <h3>Room Information</h3>
-    <div>
+<a href="{% url 'user_home' user.ID %}"> user home </a>
+
+<h3>Rooms Your joined</h3>
+<div>
         <table class="blueTable">
-    <thead>
+  <thead>
+    <tr>
+      <th>room id</th>
+      <th>room name</th>
+      <th>host</th>
+      <th>  </th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for room in rooms %}
       <tr>
-        <th> ID </th>
-        <th>Room name</th>
-        <th> Host </th>
-        <th>　</th>
+        <td>{{ room.idRoomNumber }}</td>
+        <td>{{ room.RoomName }}</td>
+        <td>{{ room.Host }}</td>
+        <td><a href="{% url 'party' room.idRoomNumber user.ID %}">go party</a></td>
       </tr>
-    </thead>
-    <tbody>
-      {% for room in rooms %}
-        <tr>
-          <td>{{ room.idRoomNumber }}</td>
-          <td>{{ room.RoomName }}</td>
-          <td>{{ room.Host }}</td>
-          <td><a href="{% url 'addGuest' room.idRoomNumber user_id %}">Join</a></td>
-        </tr>
-      {% endfor %}
-    </tbody>
+    {% endfor %}
+  </tbody>
 </table>
 </div>
 
-<a href="{% url 'join' user_id %}"> search again </a>
+
+
+
+
+<h3>Rooms Your Hosted</h3>
+<div>
+    <table class="blueTable">
+  <thead>
+    <tr>
+      <th>room id</th>
+      <th>room name</th>
+      <th>host</th>
+      <th>  </th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for room in hostRooms %}
+      <tr>
+        <td>{{ room.idRoomNumber }}</td>
+        <td>{{ room.RoomName }}</td>
+        <td>{{ room.Host }}</td>
+        <td><a href="{% url 'party' room.idRoomNumber user.ID %}">go party</a></td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
 
 </body>
 </html>
-

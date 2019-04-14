@@ -100,11 +100,16 @@ def join(request, user_id):
     )
 
 def addGuest(request, room_id, user_id):
-    guest = Guest(User = Users.objects.get(ID=user_id), Room = Rooms.objects.get(idRoomNumber=room_id))
-    guest.save()
-    return redirect('party', room_id=room_id, user_id=user_id)
+    room = Rooms.objects.get(idRoomNumber=room_id)
+    user = Users.objects.get(ID=user_id)
+    if Guest.objects.filter(Room=room, User=user).exists():
+        return redirect('party', room_id=room_id, user_id=user_id)
+    else:
+        guest = Guest(User = user, Room = room)
+        guest.save()
+        return redirect('party', room_id=room_id, user_id=user_id)
 
-
+        
 def party(request, room_id, user_id):
     room = Rooms.objects.get(idRoomNumber = room_id)
     d = {

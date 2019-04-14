@@ -3,11 +3,14 @@ from django.shortcuts import render
 from datetime import datetime
 from django.http import HttpResponse, JsonResponse
 from django import forms
+from django.utils.safestring import mark_safe
 from django.http import HttpResponseRedirect, Http404
 from main.serializers import UsersSerializer
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 from main.models import Users, Rooms
+import json
+import requests
 from . import spotifyAuth
 class login_form(forms.Form):
     email = forms.CharField(label='Email', max_length=100)
@@ -186,15 +189,80 @@ def welcome(request):
         'welcome.html'
     )
 
-def profile(request):
-    spotifyAuth.userAuth()
-    #user_data = spotifyAuth.getUserData(auth_header)
-    return render(request, 'profile.html')
 
 def party(request):
     return render(request, 'party.html')
+
+
+def profile(request):
+    spotifyAuth.userAuth()
+    return render(request, 'profile.html')
 
 def test(request):
     auth_header = spotifyAuth.ajay(request)
     user_data = spotifyAuth.getUserData(auth_header)
     return render(request,'hello/test.html',{'user_data':user_data})
+
+def test2(request):
+    spotifyAuth.playlistsAuth()
+    return render(request, 'hello/test2.html')
+
+def playlists(request):
+    auth_header = spotifyAuth.getListofPlaylistsAuthToken(request)
+    user_data = spotifyAuth.getUserData(auth_header)
+    user_id = user_data['id']
+    playlist_data = spotifyAuth.getListofPlayLists(auth_header,user_id)
+    return render(request,'hello/playlists.html',{'playlist_data':playlist_data})
+
+def test4(request):
+    return render(request,'hello/test4.html')
+
+def album(request):
+    return render(request, 'hello/album.html')
+
+
+def test3(request):
+    spotifyAuth.getTracksAuth()
+    return render(request, 'hello/test3.html')
+
+def tracks(request):
+    auth_header = spotifyAuth.getTracksAuthToken(request)
+    user_data = spotifyAuth.getUserData(auth_header)
+    user_id = user_data['id']
+    playlist_data = spotifyAuth.getListofPlayLists(auth_header,user_id)
+    listOfPlaylists = playlist_data['items']
+    listOfPlaylistId = []
+   
+    for playlist in listOfPlaylists:
+        if playlist['name'] == 'Test':
+            listOfPlaylistId.append(playlist['id'])
+
+    listOfTracks = []
+    
+    for id in listOfPlaylistId:
+        temp = spotifyAuth.getTracksfromPlaylist(auth_header,id)
+        temp2 = temp['items']
+        for song in temp2:
+            listOfTracks.append(song['track'])
+
+    song_dict = dict()
+
+    for song in listOfTracks:
+        if song['is_local']==False:
+            name = song['name']
+            popularity = song['popularity']
+            listOfartists = song['artists']
+            temp = list()
+            for artist in listOfartists:
+                artist_name = artist['name']
+                temp.append(artist_name)
+            
+            song_dict[name] = (popularity,temp)
+            #full_album = spotifyAuth.getAlbum(auth_header,albumId)
+            # Make a get album method because get request is not working because its asking for authtoken. 
+            # LOOK AT THE COMMENT ABOVE IN THE MORNING ONCE YOU HAVE SLEPT!!!!!!!!!!!!!
+            #print(response_data)
+
+    return render(request, 'hello/tracks.html',{'song_dict':song_dict})
+
+    

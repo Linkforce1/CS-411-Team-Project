@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: django-slack
+Version: 5.13.0
+Summary: Provides easy-to-use integration between Django projects and the Slack group chat and IM tool.
+Home-page: https://chris-lamb.co.uk/projects/django-slack
+Author: Chris Lamb
+Author-email: chris@chris-lamb.co.uk
+License: BSD
+Description: UNKNOWN
+Platform: UNKNOWN

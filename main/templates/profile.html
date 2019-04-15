@@ -8,7 +8,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  
+
   <title>Party</title>
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 
@@ -89,9 +89,11 @@ a:visited {
 
     <header id="header">
         <h2>Hi {{user.Nickname}}, {{user.Email}}</h2>
-      </header> 
-      
+      </header>
+
   <a href="{% url 'user_home' user.ID %}"> go to user home </a>
+  <br>
+  <a href="{% url 'update' user.ID %}"> update your profile </a>
   <!-- <h2>This is the profile page</h2> -->
 
   <!-- <div>
@@ -101,7 +103,7 @@ a:visited {
 
 
   <h4>Database information</h4>
-  
+
   <h3>Users</h3>
 
 <div>
@@ -176,4 +178,3 @@ a:visited {
   </div>
   </body>
   </html>
-  

@@ -12,11 +12,11 @@ body {margin:0;}
 
 <body>
 <ul>
-  
+
   <h1> Welcome {{user.Nickname}} </h1>
   <li> <a class="active" href="/welcome"> music party </a> </li>
-  <li> <a href="{% url 'profile' user.ID %}"> account </a> </li>
-  <li> <a href="{% url 'yourRooms' user.ID %}"> account </a> </li>
+  <li> <a href="{% url 'profile' user.ID %}"> profile </a> </li>
+  <li> <a href="{% url 'yourRooms' user.ID %}"> your rooms </a> </li>
 
 </ul>
 

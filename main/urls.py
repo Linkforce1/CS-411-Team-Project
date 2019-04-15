@@ -8,10 +8,12 @@ urlpatterns = [
     path("signup", views.signup, name="signup"),
     path("user_home/<int:user_id>", views.user_home, name="user_home"),
     path("profile/<int:user_id>",views.profile,name="profile"),
+    path("update/<int:user_id>",views.update,name="update"),
     path("yourRooms/<int:user_id>", views.yourRooms, name="yourRooms"),
     path("create/<int:user_id>", views.create, name="create"),
     path("join/<int:user_id>", views.join, name="join"),
     path("addGuest/<int:room_id>/<int:user_id>", views.addGuest, name="addGuest"),
+    path("leaveRoom/<int:room_id>/<int:user_id>", views.leaveRoom, name="leaveRoom"),
     path("party/<int:room_id>/<int:user_id>", views.party, name="party"),
     #path("party", views.party, name="party"),
 

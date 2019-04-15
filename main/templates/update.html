@@ -1,0 +1,33 @@
+{% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/login.css' %}">
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!------ Include the above in your HEAD tag ---------->
+
+<div class="wrapper fadeInDown">
+  <div id="formContent">
+    <!-- Tabs Titles -->
+    <h3>Update</h3>
+    <!-- Register Form -->
+    <form action="{% url 'update' id %}" method="post">
+     {% csrf_token %}
+      {{ form }}
+      <input id ="update" type="submit" class="fadeIn fifth" value="Update">
+    </form>
+
+    {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+        <h3 style="color:red; font-weight: bold; font-size: 30px;" class="{{ message.tags }}">{{ message }}</h3>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+    <!-- Remind Passowrd -->
+    <!-- <div id="formFooter">
+      <a class="underlineHover" href="#">Forgot Password?</a>
+    </div> -->
+
+  </div>
+</div>

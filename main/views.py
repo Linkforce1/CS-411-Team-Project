@@ -20,6 +20,17 @@ class sign_up_form(forms.Form):
     password = forms.CharField(label='password', max_length=100)
     confirm_password = forms.CharField(label='confirm password', max_length=100)
 
+class update_form(forms.Form):
+    GENDER_CHOICES = [
+        ('male', 'male'),
+        ('female', 'female'),
+    ]
+    gender = forms.ChoiceField(label='gender', required=False, choices=GENDER_CHOICES)
+    nickname = forms.CharField(label='Nickname', required=False, max_length=100)
+    new_password = forms.CharField(label='new_password', required=False, max_length=100)
+    prev_password = forms.CharField(label='input the previous password', max_length=100)
+
+
 class room_form(forms.Form):
     room_name = forms.CharField(label='room_name', max_length=100)
     private = forms.BooleanField()
@@ -45,6 +56,34 @@ def profile(request, user_id):
         'guests': Guest.objects.all(),
     }
     return render(request, 'profile.html', d)
+
+def update(request, user_id):
+    form = update_form(request.POST or None)
+    if request.method == 'POST':
+        #data = request.POST.copy()
+        #serializer = UsersSerializer(data = data)
+        if form.is_valid():
+            user = Users.objects.get(ID=user_id)
+            if request.POST.get('prev_password') == user.Password:
+                nickname = request.POST.get('nickname')
+                if nickname == "":
+                    nickname = user.Nickname
+                new_password = request.POST.get('new_password')
+                if new_password == "":
+                    new_password = user.Password
+                gender = request.POST.get('gender')
+                Users.objects.filter(ID=user_id).update(Nickname=nickname, Password=new_password, Gender=gender)
+                return redirect('profile', user_id=user_id)
+            else:
+                messages.error(request,'Password is incorrect.')
+
+    else:
+        form = update_form()
+        #return JsonResponse(form.errors, status=400)
+    return render(
+        request,
+        'update.html', {'form':form, 'id': user_id}
+    )
 
 
 def yourRooms(request, user_id):
@@ -109,7 +148,13 @@ def addGuest(request, room_id, user_id):
         guest.save()
         return redirect('party', room_id=room_id, user_id=user_id)
 
-        
+def leaveRoom(request, room_id, user_id):
+    room = Rooms.objects.get(idRoomNumber=room_id)
+    user = Users.objects.get(ID=user_id)
+    Guest.objects.filter(Room=room, User=user).delete();
+    return redirect('user_home', user_id=user_id)
+
+
 def party(request, room_id, user_id):
     room = Rooms.objects.get(idRoomNumber = room_id)
     d = {

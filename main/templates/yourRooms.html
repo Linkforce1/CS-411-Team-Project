@@ -9,7 +9,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  
+
   <title>Account</title>
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 
@@ -93,7 +93,7 @@ a:visited {
 
 <a href="{% url 'user_home' user.ID %}"> user home </a>
 
-<h3>Rooms Your joined</h3>
+<h3>Rooms You joined</h3>
 <div>
         <table class="blueTable">
   <thead>
@@ -101,6 +101,7 @@ a:visited {
       <th>room id</th>
       <th>room name</th>
       <th>host</th>
+      <th>  </th>
       <th>  </th>
     </tr>
   </thead>
@@ -111,6 +112,7 @@ a:visited {
         <td>{{ room.RoomName }}</td>
         <td>{{ room.Host }}</td>
         <td><a href="{% url 'party' room.idRoomNumber user.ID %}">go party</a></td>
+        <td><a href="{% url 'leaveRoom' room.idRoomNumber user.ID %}"> leave </a></td>
       </tr>
     {% endfor %}
   </tbody>
@@ -121,7 +123,7 @@ a:visited {
 
 
 
-<h3>Rooms Your Hosted</h3>
+<h3>Rooms You Hosted</h3>
 <div>
     <table class="blueTable">
   <thead>

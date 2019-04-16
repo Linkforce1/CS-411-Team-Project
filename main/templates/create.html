@@ -25,6 +25,16 @@
     </form>
 
 
+    {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+        <h3 style="color:red; font-weight: bold; font-size: 30px;" class="{{ message.tags }}">{{ message }}</h3>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+
+
   </div>
 </div>
 

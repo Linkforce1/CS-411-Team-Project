@@ -1,0 +1,5 @@
+aws:elasticbeanstalk:container:python:
+   NumProcesses: '1'
+   NumThreads: '15'
+   StaticFiles: /static/=static/
+   WSGIPath: web_project/wsgi.py

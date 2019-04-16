@@ -44,10 +44,8 @@
   <a href="#header" id="logo"><i class="fas fa-cat"></i> Hi There</a>
   <a href="{% url 'user_home' user.ID %}"> USER HOME </a>
     <div id="navbar-right">
-      <a id="first" href="#Section1">1</a>
-      <a id="second" href="#Section2">2</a>
-      <a id="second" href="#Section3">3</a>
-      <a id="forth" href="#Section4">4</a>
+        <a href="{% url 'leaveRoom' room.idRoomNumber user.ID %}"> Leave Room </a>
+
     </div>
 </nav>
 <section id="Section1">

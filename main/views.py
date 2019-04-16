@@ -9,6 +9,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 from main.models import Users, Rooms, Guest
 from django.contrib import messages
+from django.db import connection
 
 class login_form(forms.Form):
     email = forms.CharField(label='Email', max_length=100)
@@ -33,7 +34,7 @@ class update_form(forms.Form):
 
 class room_form(forms.Form):
     room_name = forms.CharField(label='room_name', max_length=100)
-    private = forms.BooleanField()
+    private = forms.BooleanField(required=False)
     duration = forms.IntegerField()
 
 class room_search_form(forms.Form):
@@ -43,6 +44,11 @@ def home(request):
     return HttpResponseRedirect('/welcome');
 
 def user_home(request, user_id):
+    # print("test", Users.objects.get(ID=user_id))
+    # cursor = connection.cursor()
+    # cursor.execute("UPDATE main_users SET Phone = 1 WHERE ID = %s", [user_id])
+    # cursor.execute("DELETE main_users WHERE ID = %s", )
+    
     return render(
         request,
         'home.html', {'user': Users.objects.get(ID=user_id)}
@@ -72,6 +78,7 @@ def update(request, user_id):
                 if new_password == "":
                     new_password = user.Password
                 gender = request.POST.get('gender')
+
                 Users.objects.filter(ID=user_id).update(Nickname=nickname, Password=new_password, Gender=gender)
                 return redirect('profile', user_id=user_id)
             else:
@@ -87,15 +94,30 @@ def update(request, user_id):
 
 
 def yourRooms(request, user_id):
-    user = Users.objects.get(ID=user_id)
-    rooms = []
-    for guest in Guest.objects.filter(User=user):
-        rooms.append(guest.Room)
-    hostRooms = Rooms.objects.filter(Host=user.Nickname)
-    return render(
-        request,
-        'yourRooms.html', {'rooms': rooms, 'hostRooms': hostRooms, 'user': user}
-    )
+    # cur = connection.cursor()
+    # cur.execute('SELECT * FROM main_users WHERE ID = %s', [user_id])
+    # user = cur.fetchone()
+    # print("test", user[3])
+    for user in Users.objects.raw('SELECT * FROM main_users WHERE ID = %s', [user_id]):
+    # user = Users.objects.get(ID=user_id)
+        rooms = []
+        # ? ? ?
+        for guest in Guest.objects.filter(User=user):
+            rooms.append(guest.Room)
+
+        # test = Rooms.objects.none()
+        # print(test)
+
+        # for room in Rooms.objects.raw('SELECT * FROM main_rooms WHERE HOST = %s', [user.Nickname]):
+        #     # print(room)
+        #     test.add(room)
+        # print(test)
+        hostRooms = Rooms.objects.filter(Host=user.Nickname)
+        print(hostRooms)
+        return render(
+            request,
+            'yourRooms.html', {'rooms': rooms, 'hostRooms': hostRooms, 'user': user}
+        )
 
 def create(request, user_id):
     form = room_form(request.POST or None)
@@ -106,12 +128,29 @@ def create(request, user_id):
             else:
                 Rooms.room_counter += 1
             room_name = request.POST.get('room_name')
-            private = request.POST.get('private')
-            duration = request.POST.get('duration')
-            host = Users.objects.get(ID=user_id).Nickname
-            room = Rooms(idRoomNumber = Rooms.room_counter, RoomName = room_name, Access = '??', Host = host)
-            room.save()
-            return redirect('user_home', user_id=user_id)
+
+            flag = 0
+            for room in Rooms.objects.raw('SELECT * FROM main_rooms WHERE RoomName = %s', [room_name]):
+                flag = 1
+            if flag == 1:
+                messages.error(request, "Room Name already exists")
+
+            if flag == 0:
+
+                private = request.POST.get('private')
+                if private == None:
+                    access = "public"
+                else:
+                    access = "private"
+                duration = request.POST.get('duration')
+
+
+                for user in Users.objects.raw('SELECT * FROM main_users WHERE ID = %s', [user_id]):
+
+                    # host = Users.objects.get(ID=user_id).Nickname
+                    room = Rooms(idRoomNumber = Rooms.room_counter, RoomName = room_name, Access = access, Host = user.Nickname)
+                    room.save()
+                    return redirect('user_home', user_id=user_id)
             # return JsonResponse(form.data, status=201)
     else:
         form = room_form()
@@ -151,7 +190,10 @@ def addGuest(request, room_id, user_id):
 def leaveRoom(request, room_id, user_id):
     room = Rooms.objects.get(idRoomNumber=room_id)
     user = Users.objects.get(ID=user_id)
-    Guest.objects.filter(Room=room, User=user).delete();
+    # cursor = connection.cursor()
+    # # cursor.execute("UPDATE main_users SET Phone = 1 WHERE ID = %s", [user_id])
+    # cursor.execute("DELETE main_guest WHERE Room_id = %s AND User_id = %s", [room_id], [user_id])
+    Guest.objects.filter(Room=room, User=user).delete()
     return redirect('user_home', user_id=user_id)
 
 
@@ -178,19 +220,38 @@ def login(request):
         if form.is_valid():
             email = request.POST.get('email')
             password = request.POST.get('password')
-
-            # check if the login is valid or not
-            if Users.objects.filter(Email=email).exists():
-                user = Users.objects.get(Email=email)
+            flag = 0
+            for user in Users.objects.raw('SELECT * FROM main_users WHERE Email = %s', [email]):
+                flag = 1
                 if user.Password == password:
                     return redirect('user_home', user_id=user.ID)
                 else:
                     messages.error(request,'Password is incorrect.')
-                   # return redirect('login')
-                   # return HttpResponse("Password is incorrect.")
-            else:
+                # print("for the testing : ", test)
+            # flag = 0
+            # for user in Users.objects.raw('SELECT * FROM main_users'):
+            #      if user.Email == email:
+            #          flag = 1
+            #          if user.Password == password:
+            #              return redirect('user_home', user_id=user.ID)
+            #          else:
+            #              messages.error(request,'Password is incorrect.')
+            if flag == 0:
                 messages.error(request,'Email does not exist.')
-              #  return HttpResponse("Email is invalid.")
+
+            # # check if the login is valid or not
+            # if Users.objects.filter(Email=email).exists():
+            #     user = Users.objects.get(Email=email)
+            #     print(user)
+            #     if user.Password == password:
+            #         return redirect('user_home', user_id=user.ID)
+            #     else:
+            #         messages.error(request,'Password is incorrect.')
+            #        # return redirect('login')
+            #        # return HttpResponse("Password is incorrect.")
+            # else:
+            #     messages.error(request,'Email does not exist.')
+            #   #  return HttpResponse("Email is invalid.")
 
     else:
         form = login_form()
@@ -212,12 +273,26 @@ def signup(request):
                 Users.user_counter += 1
             email = request.POST.get('email')
             nickname = request.POST.get('nickname')
-            password = request.POST.get('password')
-            person = Users(ID = Users.user_counter, Email = email, Nickname = nickname, Password = password)
-            person.save()
-            #serializer.save()
-            # return JsonResponse(form.data,status=201)
-            return redirect('welcome')
+
+            flag = 0
+            for user in Users.objects.raw('SELECT * FROM main_users WHERE Email = %s', [email]):
+                flag = 1
+                
+            if flag == 1:
+                messages.error(request, "Email already exists")
+            else:
+                for user in Users.objects.raw('SELECT * FROM main_users WHERE Nickname = %s', [nickname]):
+                    flag = 2
+                if flag == 2:
+                    messages.error(request, "Nickname already exists")
+            
+            if flag == 0:
+                password = request.POST.get('password')
+                person = Users(ID = Users.user_counter, Email = email, Nickname = nickname, Password = password)
+                person.save()
+                #serializer.save()
+                # return JsonResponse(form.data,status=201)
+                return redirect('welcome')
     else:
         form = sign_up_form()
         #return JsonResponse(form.errors, status=400)

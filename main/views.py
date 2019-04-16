@@ -161,6 +161,7 @@ def party(request, room_id, user_id):
         'user': Users.objects.get(ID=user_id),
         'room': room,
         'guests': Guest.objects.filter(Room = room),
+        'count': Guest.objects.filter(Room = room).count(),
     }
     return render(request, 'party.html', d)
 

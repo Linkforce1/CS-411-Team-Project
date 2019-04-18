@@ -28,6 +28,17 @@ DEBUG = True
 ALLOWED_HOSTS = ['django-env.eqv9xpyyym.us-west-2.elasticbeanstalk.com',
                 '127.0.0.1']
 
+SOCIAL_AUTH_URL_NAMESPACE = 'social'
+
+SOCIAL_AUTH_SPOTIFY_KEY = '0955f539ece74b6aac739cdb549252ec'
+
+SOCIAL_AUTH_SPOTIFY_SECRET = '4706273ab20144909ab3549c3ae67a29'
+
+SOCIAL_AUTH_SPOTIFY_SCOPE = ['user-read-email', 'user-library-read','user-read-private','user-read-birthdate']
+
+LOGIN_REDIRECT_URL = '/user_home'
+
+LOGOUT_REDIRECT_URL = '/welcome'
 
 # Application definition
 
@@ -39,9 +50,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
+    'chat',
     'rest_framework',
+    'social_django',
     'channels',
 ]
+
+CHANNEL_LAYERS = {}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -51,7 +66,43 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
 ]
+
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.social_auth.associate_by_email',
+    'social_core.pipeline.user.create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
+)
+
+
+SOCIAL_AUTH_DISCONNECT_PIPELINE = (
+# Verifies that the social association can be disconnected from the current
+# user (ensure that the user login mechanism is not compromised by this
+# disconnection).
+#'social.pipeline.disconnect.allowed_to_disconnect',
+
+# Collects the social associations to disconnect.
+'social.pipeline.disconnect.get_entries',
+
+# Revoke any access_token when possible.
+'social.pipeline.disconnect.revoke_tokens',
+
+# Removes the social associations.
+'social.pipeline.disconnect.disconnect',
+)
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GooglePlusAuth',
+    'social_core.backends.deezer.DeezerOAuth2',
+    'social_core.backends.spotify.SpotifyOAuth2',
+)
 
 ROOT_URLCONF = 'web_project.urls'
 
@@ -72,6 +123,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'web_project.wsgi.application'
+ASGI_APPLICATION = "web_project.routing.application"
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 
 # Database

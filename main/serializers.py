@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.db import models
-from main.models import Users
+from main.models import Users, Rooms, Guest
 
 class UsersSerializer(serializers.Serializer):
     Email = serializers.EmailField(required=True,allow_blank=False)
@@ -28,7 +28,39 @@ class UsersSerializer(serializers.Serializer):
         instance.Gender = validated_data.get('Gender',instance.Gender)
         instance.Password = validated_data('Password',instance.Password)
 
-        
+
+class RoomsSerializer(serializers.Serializer):
+    idRoomNumber = serializers.IntegerField(required = True)
+    RoomName = serializers.CharField(max_length = 45, allow_blank = False)
+    Access = serializers.CharField(max_length=7, allow_blank = False)
+    Host = serializers.CharField(max_length=45, allow_blank = False)
+    class Meta:
+        model = Rooms
+        fields = (
+            'idRoomNumber',
+            'RoomName',
+            'Access',
+            'Host'
+        )
+    
+    def create(self, validated_data):
+        return Rooms.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.idRoomNumber = validated_data.get('idRoomNumber',instance.idRoomNumber)
+        instance.RoomName = validated_data.get('RoomName',instance.RoomName)
+        instance.Access = validated_data.get('Access',instance.Access)
+        instance.Host = validated_data.get('Host',instance.Host)
+
+class GuestsSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Guest
+        fields = (
+            'UserEmail',
+            'RoomNumber'
+        )
+
+
 
 
 

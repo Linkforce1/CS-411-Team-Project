@@ -33,6 +33,54 @@
     -o-transition: height 2s ease;
     transition: height 2s ease;
     }
+
+
+    .test {
+    background-color: #fff;
+  }
+
+  a {
+    color: red;
+    font-family: helvetica;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  a:active {
+    color: black;
+  }
+
+  a:visited {
+    color: purple;
+  }
+
+
+  h3 {
+    font-size: 2em;
+    /* display: block; */
+    color: white;
+    /* font-weight: 250; */
+    /* background-color: black */
+  }
+
+  h2 {
+    font-size: 2em;
+    display: block;
+    color: black;
+    font-weight: 250;
+  }
+  h4 {
+    font-size: 3em;
+    display: block;
+    color: black;
+    font-weight: bold;
+    text-align: center;
+  }
+
 </style>
 
 <body>
@@ -55,33 +103,35 @@
     <div class="row">
 
       <div class="column">
-      <h1> Song list </h1>
-      </div>
+          <h1> Songs list </h1>
+          </div>
 
-      <div class="column">
-      <h1> members </h1>
-      <table>
-        <h3> host: {{ room.Host }} </h3>
-        <h3> {{ count }} members </h3>
-        <thead>
-        <tr>
-          <th>name</th>
-          <th>room</th>
-        </tr>
-        </thead>
-        <tbody>
-          {% for guest in guests %}
-          <tr>
-            <td>{{ guest.User.Nickname }}</td>
-            <td>{{ guest.Room.RoomName }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      </div>
+          <div class="column">
+          <h1> Members </h1>
 
-      <div class="column">
-      <h1> {{ room.RoomName }} </h1>
+
+          <table class="test">
+            <h3> Host: {{ room.Host }} </h3>
+            <h3> {{ count }} members </h3>
+            <thead>
+            <tr>
+              <th>Name</th>
+              <th>Room</th>
+            </tr>
+            </thead>
+            <tbody>
+              {% for guest in guests %}
+              <tr>
+                <td>{{ guest.User.Nickname }}</td>
+                <td>{{ guest.Room.RoomName }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          </div>
+
+          <div class="column">
+          <h1> {{ room.RoomName }} </h1>
 
 
       <textarea id="chat-log" cols="100" rows="20"></textarea><br/>

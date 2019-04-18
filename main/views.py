@@ -48,10 +48,11 @@ def user_home(request, user_id):
     # cursor = connection.cursor()
     # cursor.execute("UPDATE main_users SET Phone = 1 WHERE ID = %s", [user_id])
     # cursor.execute("DELETE main_users WHERE ID = %s", )
-    
+
     return render(
         request,
-        'home.html', {'user': Users.objects.get(ID=user_id)}
+        'home.html',
+        {'user': Users.objects.raw('SELECT * FROM main_users WHERE ID = %s', [user_id])[0]}
     )
 
 def profile(request, user_id):
@@ -69,7 +70,7 @@ def update(request, user_id):
         #data = request.POST.copy()
         #serializer = UsersSerializer(data = data)
         if form.is_valid():
-            user = Users.objects.get(ID=user_id)
+            user = Users.objects.raw('SELECT * FROM main_users WHERE ID = %s', [user_id])[0]
             if request.POST.get('prev_password') == user.Password:
                 nickname = request.POST.get('nickname')
                 if nickname == "":
@@ -79,7 +80,10 @@ def update(request, user_id):
                     new_password = user.Password
                 gender = request.POST.get('gender')
 
-                Users.objects.filter(ID=user_id).update(Nickname=nickname, Password=new_password, Gender=gender)
+                cursor = connection.cursor()
+                cursor.execute("UPDATE main_users SET Nickname = %s, Password = %s, Gender = %s WHERE ID = %s", [nickname, new_password, gender, user_id])
+                # cursor.execute("DELETE main_users WHERE ID = %s", )
+                # Users.objects.filter(ID=user_id).update(Nickname=nickname, Password=new_password, Gender=gender)
                 return redirect('profile', user_id=user_id)
             else:
                 messages.error(request,'Password is incorrect.')
@@ -98,26 +102,38 @@ def yourRooms(request, user_id):
     # cur.execute('SELECT * FROM main_users WHERE ID = %s', [user_id])
     # user = cur.fetchone()
     # print("test", user[3])
-    for user in Users.objects.raw('SELECT * FROM main_users WHERE ID = %s', [user_id]):
-    # user = Users.objects.get(ID=user_id)
-        rooms = []
-        # ? ? ?
-        for guest in Guest.objects.filter(User=user):
-            rooms.append(guest.Room)
 
-        # test = Rooms.objects.none()
-        # print(test)
+    user = Users.objects.raw('SELECT * FROM main_users WHERE ID = %s', [user_id])[0]
+    rooms = []
+    for guest in Guest.objects.filter(User=user):
+        rooms.append(guest.Room)
+    hostRooms = Rooms.objects.filter(Host=user.Nickname)
+    #print(hostRooms)
+    return render(
+        request,
+        'yourRooms.html', {'rooms': rooms, 'hostRooms': hostRooms, 'user': user}
+    )
 
-        # for room in Rooms.objects.raw('SELECT * FROM main_rooms WHERE HOST = %s', [user.Nickname]):
-        #     # print(room)
-        #     test.add(room)
-        # print(test)
-        hostRooms = Rooms.objects.filter(Host=user.Nickname)
-        print(hostRooms)
-        return render(
-            request,
-            'yourRooms.html', {'rooms': rooms, 'hostRooms': hostRooms, 'user': user}
-        )
+    # for user in Users.objects.raw('SELECT * FROM main_users WHERE ID = %s', [user_id]):
+    # # user = Users.objects.get(ID=user_id)
+    #     rooms = []
+    #     # ? ? ?
+    #     for guest in Guest.objects.filter(User=user):
+    #         rooms.append(guest.Room)
+    #
+    #     # test = Rooms.objects.none()
+    #     # print(test)
+    #
+    #     # for room in Rooms.objects.raw('SELECT * FROM main_rooms WHERE HOST = %s', [user.Nickname]):
+    #     #     # print(room)
+    #     #     test.add(room)
+    #     # print(test)
+    #     hostRooms = Rooms.objects.filter(Host=user.Nickname)
+    #     print(hostRooms)
+    #     return render(
+    #         request,
+    #         'yourRooms.html', {'rooms': rooms, 'hostRooms': hostRooms, 'user': user}
+    #     )
 
 def create(request, user_id):
     form = room_form(request.POST or None)
@@ -136,7 +152,6 @@ def create(request, user_id):
                 messages.error(request, "Room Name already exists")
 
             if flag == 0:
-
                 private = request.POST.get('private')
                 if private == None:
                     access = "public"
@@ -145,12 +160,10 @@ def create(request, user_id):
                 duration = request.POST.get('duration')
 
 
-                for user in Users.objects.raw('SELECT * FROM main_users WHERE ID = %s', [user_id]):
-
-                    # host = Users.objects.get(ID=user_id).Nickname
-                    room = Rooms(idRoomNumber = Rooms.room_counter, RoomName = room_name, Access = access, Host = user.Nickname)
-                    room.save()
-                    return redirect('user_home', user_id=user_id)
+                user = Users.objects.raw('SELECT * FROM main_users WHERE ID = %s', [user_id])[0]
+                room = Rooms(idRoomNumber = Rooms.room_counter, RoomName = room_name, Access = access, Host = user.Nickname)
+                room.save()
+                return redirect('user_home', user_id=user_id)
             # return JsonResponse(form.data, status=201)
     else:
         form = room_form()
@@ -188,22 +201,25 @@ def addGuest(request, room_id, user_id):
         return redirect('party', room_id=room_id, user_id=user_id)
 
 def leaveRoom(request, room_id, user_id):
-    room = Rooms.objects.get(idRoomNumber=room_id)
-    user = Users.objects.get(ID=user_id)
-    # cursor = connection.cursor()
-    # # cursor.execute("UPDATE main_users SET Phone = 1 WHERE ID = %s", [user_id])
-    # cursor.execute("DELETE main_guest WHERE Room_id = %s AND User_id = %s", [room_id], [user_id])
-    Guest.objects.filter(Room=room, User=user).delete()
+    # room = Rooms.objects.get(idRoomNumber=room_id)
+    # user = Users.objects.get(ID=user_id)
+    cursor = connection.cursor()
+     # cursor.execute("UPDATE main_users SET Phone = 1 WHERE ID = %s", [user_id])
+    cursor.execute("DELETE FROM main_guest WHERE Room_id = %s AND User_id = %s", [room_id, user_id])
+    # Guest.objects.filter(Room=room, User=user).delete()
     return redirect('user_home', user_id=user_id)
 
 
 def party(request, room_id, user_id):
     room = Rooms.objects.get(idRoomNumber = room_id)
+    #print(Guest.objects.raw('SELECT count(*) FROM main_guest WHERE Room = %s', [room_id]))
     d = {
         'user': Users.objects.get(ID=user_id),
         'room': room,
+        #'guests': Guest.objects.raw('SELECT * FROM main_guest WHERE Room = %s', [room]),
         'guests': Guest.objects.filter(Room = room),
         'count': Guest.objects.filter(Room = room).count(),
+        #'count': Guest.objects.raw('SELECT count(*) FROM main_guest WHERE Room = %s', [room_id]),
     }
     return render(request, 'party.html', d)
 
@@ -278,7 +294,7 @@ def signup(request):
             flag = 0
             for user in Users.objects.raw('SELECT * FROM main_users WHERE Email = %s', [email]):
                 flag = 1
-                
+
             if flag == 1:
                 messages.error(request, "Email already exists")
             else:
@@ -286,7 +302,7 @@ def signup(request):
                     flag = 2
                 if flag == 2:
                     messages.error(request, "Nickname already exists")
-            
+
             if flag == 0:
                 password = request.POST.get('password')
                 person = Users(ID = Users.user_counter, Email = email, Nickname = nickname, Password = password)

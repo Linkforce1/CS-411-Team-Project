@@ -84,10 +84,8 @@ def login(request):
             if Users.objects.filter(Email=email).exists():
                 user = Users.objects.get(Email=email)
                 if user.Password == password:
-                    response = render(
-                        request,
-                        'home.html', {'user': user}
-                    )
+                    auth_header = spotifyAuth.getTracksAuth()
+                    response = HttpResponseRedirect(auth_header)
                      # redirect('user_home', user_id=user.ID)
                     response.set_cookie(LOGIN_COOKIE, crypt.crypt(email, 'abc'))
                     response.set_cookie(UID_COOKIE, user.ID)
@@ -162,13 +160,12 @@ def user_home(request):
             if Users.objects.filter(Email=email).exists():
                 user = Users.objects.get(Email=email)
                 if user.Password == password:
-                    response = render(
-                        request,
-                        'home.html', {'user': user}
-                    )
+                    auth_header = spotifyAuth.getTracksAuth()
+                    response = HttpResponseRedirect(auth_header)
                      # redirect('user_home', user_id=user.ID)
                     response.set_cookie(LOGIN_COOKIE, crypt.crypt(email, 'abc'))
-                    response.set_cookie(UID_COOKIE, user)
+                    response.set_cookie(UID_COOKIE, user.ID)
+                    print(request.COOKIES.get(UID_COOKIE, None))
                     return response
                 else:
                     return HttpResponse("Password is incorrect.")
@@ -459,7 +456,7 @@ def album(request):
 
 
 def test3(request):
-    spotifyAuth.tracksAuth()
+    #spotifyAuth.tracksAuth()
     return spotifyAuth.tracksAuth()
 
 

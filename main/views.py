@@ -1,4 +1,7 @@
 import re
+import crypt
+from . import recommendation
+
 from django.shortcuts import render, redirect
 from datetime import datetime
 from django.http import HttpResponse, JsonResponse
@@ -12,6 +15,7 @@ from main.models import Users, Rooms, Guest
 from django.contrib import messages
 from django.db import connection
 
+
 import json
 import requests
 from . import spotifyAuth
@@ -20,10 +24,10 @@ class login_form(forms.Form):
     email = forms.CharField(label='Email', max_length=100)
     password = forms.CharField(label='password', max_length=100)
 
-class delete_form(forms.Form):
-    email = forms.CharField(label='Email', max_length=100)
-    password = forms.CharField(label='password', max_length=100)
-    room_name = forms.CharField(label='room_name', max_length=100)
+# class delete_form(forms.Form):
+#     email = forms.CharField(label='Email', max_length=100)
+#     password = forms.CharField(label='password', max_length=100)
+#     room_name = forms.CharField(label='room_name', max_length=100)
 
 class update_form(forms.Form):
     email = forms.CharField(label='Email', max_length=100)
@@ -59,15 +63,126 @@ class room_form(forms.Form):
 class room_search_form(forms.Form):
     search = forms.CharField(label='search', max_length=100)
 
+LOGIN_COOKIE = 'music_party_logged_in'
+UID_COOKIE = 'music_party_uid'
+REC_COOKIE = 'music_party_rec'
+
+
+def login_check(login_stat, user_id):
+    this = Users.objects.filter(ID = user_id)
+    if this.first():
+        if login_stat and login_stat == crypt.crypt(this.first().Email, 'abc'):
+            return 1
+    return 0;
+
+def login(request):
+    form = login_form(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            email = request.POST.get('email')
+            password = request.POST.get('password')
+            if Users.objects.filter(Email=email).exists():
+                user = Users.objects.get(Email=email)
+                if user.Password == password:
+                    response = render(
+                        request,
+                        'home.html', {'user': user}
+                    )
+                     # redirect('user_home', user_id=user.ID)
+                    response.set_cookie(LOGIN_COOKIE, crypt.crypt(email, 'abc'))
+                    response.set_cookie(UID_COOKIE, user.ID)
+                    print(request.COOKIES.get(UID_COOKIE, None))
+                    return response
+                else:
+                    return HttpResponse("Password is incorrect.")
+    else:
+        form = login_form()
+    return render(
+        request,
+        'login.html', {'form':form}
+    )
+
+
+def signup(request):
+    form = sign_up_form(request.POST or None)
+    #serializer = UsersSerializer(data = form)
+    if request.method == 'POST':
+        #data = request.POST.copy()
+        #serializer = UsersSerializer(data = data)
+        if form.is_valid():
+            if not Users.user_counter:
+                Users.user_counter = 1
+            else:
+                Users.user_counter += 1
+            email = request.POST.get('email')
+            nickname = request.POST.get('nickname')
+
+            flag = 0
+            for user in Users.objects.raw('SELECT * FROM main_users WHERE Email = %s', [email]):
+                flag = 1
+
+            if flag == 1:
+                messages.error(request, "Email already exists")
+            else:
+                for user in Users.objects.raw('SELECT * FROM main_users WHERE Nickname = %s', [nickname]):
+                    flag = 2
+                if flag == 2:
+                    messages.error(request, "Nickname already exists")
+
+            if flag == 0:
+                password = request.POST.get('password')
+                person = Users(ID = Users.user_counter, Email = email, Nickname = nickname, Password = password)
+                person.save()
+                #serializer.save()
+                # return JsonResponse(form.data,status=201)
+                return redirect('welcome')
+    else:
+        form = sign_up_form()
+    return render(
+        request,
+        'signup.html', {'form':form}
+    )
+
+def welcome(request):
+    return render(
+        request,
+        'welcome.html'
+    )
+
 def home(request):
     return HttpResponseRedirect('/welcome');
 
-def user_home(request, user_id):
-    # print("test", Users.objects.get(ID=user_id))
-    # cursor = connection.cursor()
-    # cursor.execute("UPDATE main_users SET Phone = 1 WHERE ID = %s", [user_id])
-    # cursor.execute("DELETE main_users WHERE ID = %s", )
+# for spotify login
+def user_home(request):
+    form = login_form(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            email = request.POST.get('email')
+            password = request.POST.get('password')
+            if Users.objects.filter(Email=email).exists():
+                user = Users.objects.get(Email=email)
+                if user.Password == password:
+                    response = render(
+                        request,
+                        'home.html', {'user': user}
+                    )
+                     # redirect('user_home', user_id=user.ID)
+                    response.set_cookie(LOGIN_COOKIE, crypt.crypt(email, 'abc'))
+                    response.set_cookie(UID_COOKIE, user)
+                    return response
+                else:
+                    return HttpResponse("Password is incorrect.")
+    else:
+        form = login_form()
+    return render(
+        request,
+        'login2.html', {'form':form}
+    )
 
+# true user home
+def user_home2(request, user_id):
+    if not login_check(request.COOKIES.get(LOGIN_COOKIE, None), user_id):
+        return HttpResponseRedirect('/welcome');
     return render(
         request,
         'home.html',
@@ -110,7 +225,6 @@ def update(request, user_id):
 
     else:
         form = update_form()
-        #return JsonResponse(form.errors, status=400)
     return render(
         request,
         'update.html', {'form':form, 'id': user_id}
@@ -128,32 +242,10 @@ def yourRooms(request, user_id):
     for guest in Guest.objects.filter(User=user):
         rooms.append(guest.Room)
     hostRooms = Rooms.objects.filter(Host=user.Nickname)
-    #print(hostRooms)
     return render(
         request,
         'yourRooms.html', {'rooms': rooms, 'hostRooms': hostRooms, 'user': user}
     )
-
-    # for user in Users.objects.raw('SELECT * FROM main_users WHERE ID = %s', [user_id]):
-    # # user = Users.objects.get(ID=user_id)
-    #     rooms = []
-    #     # ? ? ?
-    #     for guest in Guest.objects.filter(User=user):
-    #         rooms.append(guest.Room)
-    #
-    #     # test = Rooms.objects.none()
-    #     # print(test)
-    #
-    #     # for room in Rooms.objects.raw('SELECT * FROM main_rooms WHERE HOST = %s', [user.Nickname]):
-    #     #     # print(room)
-    #     #     test.add(room)
-    #     # print(test)
-    #     hostRooms = Rooms.objects.filter(Host=user.Nickname)
-    #     print(hostRooms)
-    #     return render(
-    #         request,
-    #         'yourRooms.html', {'rooms': rooms, 'hostRooms': hostRooms, 'user': user}
-    #     )
 
 def create(request, user_id):
     form = room_form(request.POST or None)
@@ -183,8 +275,7 @@ def create(request, user_id):
                 user = Users.objects.raw('SELECT * FROM main_users WHERE ID = %s', [user_id])[0]
                 room = Rooms(idRoomNumber = Rooms.room_counter, RoomName = room_name, Access = access, Host = user.Nickname)
                 room.save()
-                return redirect('user_home', user_id=user_id)
-            # return JsonResponse(form.data, status=201)
+                return redirect('user_home2', user_id=user_id)
     else:
         form = room_form()
     return render(
@@ -227,7 +318,7 @@ def leaveRoom(request, room_id, user_id):
      # cursor.execute("UPDATE main_users SET Phone = 1 WHERE ID = %s", [user_id])
     cursor.execute("DELETE FROM main_guest WHERE Room_id = %s AND User_id = %s", [room_id, user_id])
     # Guest.objects.filter(Room=room, User=user).delete()
-    return redirect('user_home', user_id=user_id)
+    return redirect('user_home2', user_id=user_id)
 
 
 def party(request, room_id, user_id):
@@ -238,8 +329,9 @@ def party(request, room_id, user_id):
         'room': room,
         #'guests': Guest.objects.raw('SELECT * FROM main_guest WHERE Room = %s', [room]),
         'guests': Guest.objects.filter(Room = room),
+        'rec': request.COOKIES.get(REC_COOKIE, None),
         'count': Guest.objects.filter(Room = room).count(),
-        #'count': Guest.objects.raw('SELECT count(*) FROM main_guest WHERE Room = %s', [room_id]),
+        # 'count': Guest.objects.raw('SELECT count(*) FROM main_guest WHERE Room = %s', [room_id]),
     }
     return render(request, 'party.html', d)
 
@@ -251,11 +343,7 @@ def public_rooms(request):
                 {'rooms': rooms}
     )
 
-# def user_home(request):
-#     return render(
-#         request,
-#         'home.html'
-#     )
+
 
 # def create(request):
 #     form = room_form(request.POST or None)
@@ -347,110 +435,6 @@ def public_rooms(request):
 #         'join.html', {'form':form }
 #     )
 
-
-def login(request):
-    form = login_form(request.POST or None)
-    if request.method == 'POST':
-        if form.is_valid():
-            email = request.POST.get('email')
-            password = request.POST.get('password')
-            flag = 0
-            for user in Users.objects.raw('SELECT * FROM main_users WHERE Email = %s', [email]):
-                flag = 1
-                if user.Password == password:
-                    return redirect('user_home', user_id=user.ID)
-                else:
-                    messages.error(request,'Password is incorrect.')
-                # print("for the testing : ", test)
-            # flag = 0
-            # for user in Users.objects.raw('SELECT * FROM main_users'):
-            #      if user.Email == email:
-            #          flag = 1
-            #          if user.Password == password:
-            #              return redirect('user_home', user_id=user.ID)
-            #          else:
-            #              messages.error(request,'Password is incorrect.')
-            if flag == 0:
-                messages.error(request,'Email does not exist.')
-
-            # # check if the login is valid or not
-            # if Users.objects.filter(Email=email).exists():
-            #     user = Users.objects.get(Email=email)
-            #     print(user)
-            #     if user.Password == password:
-            #         return redirect('user_home', user_id=user.ID)
-            #     else:
-            #         messages.error(request,'Password is incorrect.')
-            #        # return redirect('login')
-            #        # return HttpResponse("Password is incorrect.")
-            # else:
-            #     messages.error(request,'Email does not exist.')
-            #   #  return HttpResponse("Email is invalid.")
-
-    else:
-        form = login_form()
-    return render(
-        request,
-        'login.html', {'form':form}
-    )
-
-
-def signup(request):
-    form = sign_up_form(request.POST or None)
-    #serializer = UsersSerializer(data = form)
-    if request.method == 'POST':
-        #data = request.POST.copy()
-        #serializer = UsersSerializer(data = data)
-        if form.is_valid():
-            if not Users.user_counter:
-                Users.user_counter = 1
-            else:
-                Users.user_counter += 1
-            email = request.POST.get('email')
-            nickname = request.POST.get('nickname')
-
-            flag = 0
-            for user in Users.objects.raw('SELECT * FROM main_users WHERE Email = %s', [email]):
-                flag = 1
-
-            if flag == 1:
-                messages.error(request, "Email already exists")
-            else:
-                for user in Users.objects.raw('SELECT * FROM main_users WHERE Nickname = %s', [nickname]):
-                    flag = 2
-                if flag == 2:
-                    messages.error(request, "Nickname already exists")
-
-            if flag == 0:
-                password = request.POST.get('password')
-                person = Users(ID = Users.user_counter, Email = email, Nickname = nickname, Password = password)
-                person.save()
-                #serializer.save()
-                # return JsonResponse(form.data,status=201)
-                return redirect('welcome')
-    else:
-        form = sign_up_form()
-        #return JsonResponse(form.errors, status=400)
-    return render(
-        request,
-        'signup.html', {'form':form}
-    )
-
-def welcome(request):
-    return render(
-        request,
-        'welcome.html'
-    )
-
-
-# def party(request):
-#     return render(request, 'party.html')
-#
-#
-# def profile(request):
-#     spotifyAuth.userAuth()
-#     return render(request, 'profile.html')
-
 def test(request):
     auth_header = spotifyAuth.ajay(request)
     user_data = spotifyAuth.getUserData(auth_header)
@@ -475,45 +459,58 @@ def album(request):
 
 
 def test3(request):
-    spotifyAuth.getTracksAuth()
-    return render(request, 'hello/test3.html')
+    spotifyAuth.tracksAuth()
+    return spotifyAuth.tracksAuth()
+
+
 
 def tracks(request):
-    auth_header = spotifyAuth.getTracksAuthToken(request)
-    user_data = spotifyAuth.getUserData(auth_header)
-    user_id = user_data['id']
-    playlist_data = spotifyAuth.getListofPlayLists(auth_header,user_id)
-    listOfPlaylists = playlist_data['items']
-    listOfPlaylistId = []
+        auth_header = spotifyAuth.getTracksAuthToken(request)
+        user_data = spotifyAuth.getUserData(auth_header)
+        user_id = user_data['id']
+        playlist_data = spotifyAuth.getListofPlayLists(auth_header,user_id)
+        listOfPlaylists = playlist_data['items']
+        listOfPlaylistId = []
 
-    for playlist in listOfPlaylists:
-        if playlist['name'] == 'Test':
-            listOfPlaylistId.append(playlist['id'])
+        for playlist in listOfPlaylists:
+            if playlist['name'] == 'Test':
+                listOfPlaylistId.append(playlist['id'])
 
-    listOfTracks = []
+        listOfTracks = [[] for id in listOfPlaylistId]
 
-    for id in listOfPlaylistId:
-        temp = spotifyAuth.getTracksfromPlaylist(auth_header,id)
-        temp2 = temp['items']
-        for song in temp2:
-            listOfTracks.append(song['track'])
+        for id in listOfPlaylistId:
+            temp = spotifyAuth.getTracksfromPlaylist(auth_header,id)
+            temp2 = temp['items']
+            for song in temp2:
+                listOfTracks[listOfPlaylistId.index(id)].append(song['track'])
 
-    song_dict = dict()
+        song_dict = [dict() for id in listOfPlaylistId]
+        for k in range(len(listOfTracks)):
+            for song in listOfTracks[k]:
+                if song['is_local']==False:
+                    name = song['name']
+                    popularity = song['popularity']
+                    listOfartists = song['artists']
+                    temp = list()
+                    for artist in listOfartists:
+                        artist_name = artist['name']
+                        temp.append(artist_name)
 
-    for song in listOfTracks:
-        if song['is_local']==False:
-            name = song['name']
-            popularity = song['popularity']
-            listOfartists = song['artists']
-            temp = list()
-            for artist in listOfartists:
-                artist_name = artist['name']
-                temp.append(artist_name)
-
-            song_dict[name] = (popularity,temp)
-            #full_album = spotifyAuth.getAlbum(auth_header,albumId)
-            # Make a get album method because get request is not working because its asking for authtoken.
-            # LOOK AT THE COMMENT ABOVE IN THE MORNING ONCE YOU HAVE SLEPT!!!!!!!!!!!!!
-            #print(response_data)
-
-    return render(request, 'hello/tracks.html',{'song_dict':song_dict})
+                    song_dict[k][name] = (popularity,temp)
+                #full_album = spotifyAuth.getAlbum(auth_header,albumId)
+                # Make a get album method because get request is not working because its asking for authtoken.
+                # LOOK AT THE COMMENT ABOVE IN THE MORNING ONCE YOU HAVE SLEPT!!!!!!!!!!!!!
+                #print(response_data)
+        r1, r2 = recommendation.do_recommendation(song_dict)
+        t1 = [0] * 5
+        for i in r1:
+            t1[i] += 1
+        temp = r2[r1.index(t1.index(max(t1)))]
+        res = ", ".join(temp)
+        print("\n\n temp")
+        print(temp)
+        # print(temp)
+        response = redirect('user_home2', user_id = request.COOKIES.get(UID_COOKIE, None))
+        response.set_cookie(REC_COOKIE, temp)
+        print(request.COOKIES.get(UID_COOKIE, None))
+        return response

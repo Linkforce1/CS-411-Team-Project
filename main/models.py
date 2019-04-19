@@ -23,6 +23,6 @@ class Users(models.Model):
     objects = models.Manager()
 
 class Guest(models.Model):
-    User = models.ForeignKey(Users, on_delete=models.CASCADE, to_field='Email')
+    User = models.ForeignKey(Users, on_delete=models.CASCADE)
     Room = models.ForeignKey(Rooms, on_delete=models.CASCADE)
     objects = models.Manager()

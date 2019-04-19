@@ -68,7 +68,7 @@ def playlistsAuth():
 
 def tracksAuth():
     auth_header = getTracksAuth()
-    HttpResponseRedirect(auth_header)
+    return HttpResponseRedirect(auth_header)
     #requests.get(auth_header)
 
 

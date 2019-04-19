@@ -1,3 +1,8 @@
+<!-- docker run -p 6379:6379 -d redis:2.8 -->
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -90,7 +95,7 @@
 </header>
 <nav id="navbar">
   <a href="#header" id="logo"><i class="fas fa-cat"></i> Hi There</a>
-  <a href="{% url 'user_home' user.ID %}"> USER HOME </a>
+  <a href="{% url 'user_home2' user.ID %}"> USER HOME </a>
     <div id="navbar-right">
         <a href="{% url 'leaveRoom' room.idRoomNumber user.ID %}"> Leave Room </a>
 
@@ -104,6 +109,7 @@
 
       <div class="column">
           <h1> Songs list </h1>
+          <h3> {{ rec }} </h3>
           </div>
 
           <div class="column">

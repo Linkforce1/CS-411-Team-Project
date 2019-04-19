@@ -108,8 +108,11 @@
     <div class="row">
 
       <div class="column">
-          <h1> Songs list </h1>
-          <h3> {{ rec }} </h3>
+          <h1> Recommended Songs </h1>
+          {% for item in rec %}
+                <p style="font-weight:bold;">{{ item }}</p>
+          {% endfor %}
+          <!-- <h3> {{rec}} </h3> -->
           </div>
 
           <div class="column">

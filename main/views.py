@@ -84,15 +84,25 @@ def login(request):
             if Users.objects.filter(Email=email).exists():
                 user = Users.objects.get(Email=email)
                 if user.Password == password:
-                    auth_header = spotifyAuth.getTracksAuth()
-                    response = HttpResponseRedirect(auth_header)
-                     # redirect('user_home', user_id=user.ID)
+                    # auth_header = spotifyAuth.getTracksAuth()
+                    # response = HttpResponseRedirect(auth_header)
+                    # response.set_cookie(LOGIN_COOKIE, crypt.crypt(email, 'abc'))
+                    # response.set_cookie(UID_COOKIE, user.ID)
+                    # print(request.COOKIES.get(UID_COOKIE, None))
+
+                    response = render(
+                        request,
+                        'home.html', {'user': user}
+                    )
                     response.set_cookie(LOGIN_COOKIE, crypt.crypt(email, 'abc'))
-                    response.set_cookie(UID_COOKIE, user.ID)
-                    print(request.COOKIES.get(UID_COOKIE, None))
+                    response.delete_cookie(REC_COOKIE)
+
                     return response
+                    # redirect('user_home', user_id=user.ID)
                 else:
-                    return HttpResponse("Password is incorrect.")
+                    messages.error(request, 'Password is incorrect.')
+            else:
+                messages.error(request, 'Email does not exist.')
     else:
         form = login_form()
     return render(
@@ -165,10 +175,11 @@ def user_home(request):
                      # redirect('user_home', user_id=user.ID)
                     response.set_cookie(LOGIN_COOKIE, crypt.crypt(email, 'abc'))
                     response.set_cookie(UID_COOKIE, user.ID)
-                    print(request.COOKIES.get(UID_COOKIE, None))
                     return response
                 else:
-                    return HttpResponse("Password is incorrect.")
+                    messages.error(request, 'Password is incorrect.')
+            else:
+                messages.error(request, 'Email does not exist.')
     else:
         form = login_form()
     return render(
@@ -219,7 +230,6 @@ def update(request, user_id):
                 return redirect('profile', user_id=user_id)
             else:
                 messages.error(request,'Password is incorrect.')
-
     else:
         form = update_form()
     return render(
@@ -321,14 +331,22 @@ def leaveRoom(request, room_id, user_id):
 def party(request, room_id, user_id):
     room = Rooms.objects.get(idRoomNumber = room_id)
     #print(Guest.objects.raw('SELECT count(*) FROM main_guest WHERE Room = %s', [room_id]))
+    rec = request.COOKIES.get(REC_COOKIE, None)
+    if rec == None:
+        pass
+    else:
+        print("-----rec songs-----")
+        rec = rec.split(",")
+        rec[0] = rec[0][1:]
+        rec[9] = rec[9][:-1]
+        print("-----rec songs-----")
+
     d = {
         'user': Users.objects.get(ID=user_id),
         'room': room,
-        #'guests': Guest.objects.raw('SELECT * FROM main_guest WHERE Room = %s', [room]),
         'guests': Guest.objects.filter(Room = room),
-        'rec': request.COOKIES.get(REC_COOKIE, None),
+        'rec': rec,
         'count': Guest.objects.filter(Room = room).count(),
-        # 'count': Guest.objects.raw('SELECT count(*) FROM main_guest WHERE Room = %s', [room_id]),
     }
     return render(request, 'party.html', d)
 
@@ -339,8 +357,6 @@ def public_rooms(request):
                 'public_rooms.html',
                 {'rooms': rooms}
     )
-
-
 
 # def create(request):
 #     form = room_form(request.POST or None)
@@ -454,11 +470,9 @@ def test4(request):
 def album(request):
     return render(request, 'hello/album.html')
 
-
 def test3(request):
     #spotifyAuth.tracksAuth()
     return spotifyAuth.tracksAuth()
-
 
 
 def tracks(request):
@@ -497,17 +511,14 @@ def tracks(request):
                 #full_album = spotifyAuth.getAlbum(auth_header,albumId)
                 # Make a get album method because get request is not working because its asking for authtoken.
                 # LOOK AT THE COMMENT ABOVE IN THE MORNING ONCE YOU HAVE SLEPT!!!!!!!!!!!!!
-                #print(response_data)
         r1, r2 = recommendation.do_recommendation(song_dict)
         t1 = [0] * 5
         for i in r1:
             t1[i] += 1
         temp = r2[r1.index(t1.index(max(t1)))]
-        res = ", ".join(temp)
-        print("\n\n temp")
+        print("-----temp-----")
         print(temp)
-        # print(temp)
+        # res = " \n".join(temp)
         response = redirect('user_home2', user_id = request.COOKIES.get(UID_COOKIE, None))
         response.set_cookie(REC_COOKIE, temp)
-        print(request.COOKIES.get(UID_COOKIE, None))
         return response

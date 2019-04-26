@@ -125,25 +125,16 @@ def signup(request):
             email = request.POST.get('email')
             nickname = request.POST.get('nickname')
 
-            flag = 0
-            for user in Users.objects.raw('SELECT * FROM main_users WHERE Email = %s', [email]):
-                flag = 1
-
-            if flag == 1:
-                messages.error(request, "Email already exists")
-            else:
-                for user in Users.objects.raw('SELECT * FROM main_users WHERE Nickname = %s', [nickname]):
-                    flag = 2
-                if flag == 2:
+            if not Users.objects.filter(Email=email).exists():
+                if not Users.objects.filter(Nickname=nickname).exists():
+                    password = request.POST.get('password')
+                    person = Users(ID = Users.user_counter, Email = email, Nickname = nickname, Password = password)
+                    person.save()
+                    return redirect('welcome')
+                else:
                     messages.error(request, "Nickname already exists")
-
-            if flag == 0:
-                password = request.POST.get('password')
-                person = Users(ID = Users.user_counter, Email = email, Nickname = nickname, Password = password)
-                person.save()
-                #serializer.save()
-                # return JsonResponse(form.data,status=201)
-                return redirect('welcome')
+            else:
+                messages.error(request, "Email already exists")
     else:
         form = sign_up_form()
     return render(
@@ -225,7 +216,6 @@ def update(request, user_id):
 
                 cursor = connection.cursor()
                 cursor.execute("UPDATE main_users SET Nickname = %s, Password = %s, Gender = %s WHERE ID = %s", [nickname, new_password, gender, user_id])
-                # cursor.execute("DELETE main_users WHERE ID = %s", )
                 # Users.objects.filter(ID=user_id).update(Nickname=nickname, Password=new_password, Gender=gender)
                 return redirect('profile', user_id=user_id)
             else:
@@ -322,7 +312,6 @@ def leaveRoom(request, room_id, user_id):
     # room = Rooms.objects.get(idRoomNumber=room_id)
     # user = Users.objects.get(ID=user_id)
     cursor = connection.cursor()
-     # cursor.execute("UPDATE main_users SET Phone = 1 WHERE ID = %s", [user_id])
     cursor.execute("DELETE FROM main_guest WHERE Room_id = %s AND User_id = %s", [room_id, user_id])
     # Guest.objects.filter(Room=room, User=user).delete()
     return redirect('user_home2', user_id=user_id)
